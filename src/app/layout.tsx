@@ -19,14 +19,13 @@ export default function RootLayout({
       <body>
         <Provider>
           <Flex font={"var(--font-sans)"} height = {"100dhv"} overflow={"hidden"}>
-            <Box as={"aside"} flex={"0 0 auto"} position={"sticky"} top={"0"} height={"100dvh"} width={"25dvh"}>
+            <Box as={"aside"} flex={"0 0 auto"} position={"sticky"} top={"0"} height={"100dvh"}  width={"200px"}>
               <Navbar/>
             </Box>
             <Box as={"main"} flex={"1 1 auto"} minWidth={"0"} height={"100dvh"} overflowY={"auto"}> 
               {children}
             </Box>
           </Flex>
-          
         </Provider>
       </body>
     </html>

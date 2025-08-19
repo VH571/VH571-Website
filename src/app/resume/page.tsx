@@ -1,8 +1,9 @@
+import { Box } from "@chakra-ui/react"
 
 export default function Resume() {
   return (
-    <div >
-
-    </div>
+    <Box>
+      Resume
+    </Box>
   );
 }

@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  productionBrowserSourceMaps: false,
+
+  webpack: (config) => {
+    config.infrastructureLogging = {
+      ...(config.infrastructureLogging || {}),
+      level: "error",
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
