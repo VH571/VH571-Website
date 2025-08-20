@@ -5,14 +5,14 @@ export interface Link {
   url: string;
 }
 //images stores in AWS S3
-export interface ImageURL{
+export interface ImageURL {
   url: string;
   alt?: string;
   width?: number;
   height?: number;
-};
+}
 
-export interface Project{
+export interface Project {
   _id: string;
   name: string;
   role: string;
@@ -21,7 +21,7 @@ export interface Project{
   achievements?: string[];
   links?: Link[];
   screenshots: ImageURL[];
-};
+}
 
 export const LinkSchema = new Schema<Link>(
   {
@@ -38,7 +38,8 @@ export const ImageURLSchema = new Schema<ImageURL>({
   height: Number,
 });
 
-const ProjectSchema = new Schema<Project>({
+const ProjectSchema = new Schema<Project>(
+  {
     name: { type: String, required: true, trim: true },
     role: { type: String, required: true, trim: true },
     tech: [{ type: String, trim: true }],
@@ -47,7 +48,7 @@ const ProjectSchema = new Schema<Project>({
     links: [LinkSchema],
     screenshots: [ImageURLSchema],
   },
-  { timestamps: true }
+  { timestamps: true, validateBeforeSave: true, strict: "throw"}
 );
 
 export const ProjectModel: Model<Project> =

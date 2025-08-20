@@ -43,7 +43,7 @@ export default function Navbar() {
             color="var(--color-error)"
           >
             <VStack lineHeight={1}>
-              <Text fontWeight={"Bolder"} fontSize="clamp(0.5rem, 2vw, 1.9rem)">
+              <Text fontWeight={"Bolder"} fontSize="clamp(1.9rem, 2vw, 1.9rem)">
                 {label}
               </Text>
               <Text fontWeight="bold" fontSize="1rem">
@@ -54,7 +54,7 @@ export default function Navbar() {
         </Box>
 
         <VStack w="full" color="var(--color-lapis)" my="5px" align="flex-end">
-          <HStack align="flex-start" gap={"10"}>
+          <HStack align="flex-start" gap={"8"}>
             <Text
               fontSize="0.9rem"
               color="red"

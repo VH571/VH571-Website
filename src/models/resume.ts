@@ -1,7 +1,7 @@
 import mongoose, { Model, Schema, Types } from "mongoose";
 import { ImageURL, Link, ImageURLSchema, LinkSchema } from "./project";
 
-export interface Resume{
+export interface Resume {
   _id: string;
   name: string;
   title: string;
@@ -198,12 +198,12 @@ const ResumeSchema = new Schema<Resume>(
     awards: [AwardSchema],
     isDefault: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true, validateBeforeSave: true, strict: "throw" }
 );
 
 ResumeSchema.index(
   { isDefault: 1 },
   { unique: true, partialFilterExpression: { isDefault: true } }
 );
-export const ResumeModel: Model<Resume>=
+export const ResumeModel: Model<Resume> =
   mongoose.models.Resume || mongoose.model<Resume>("Resume", ResumeSchema);
