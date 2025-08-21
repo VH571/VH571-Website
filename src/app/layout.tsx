@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { Box, Flex } from "@chakra-ui/react";
 
 export const metadata: Metadata = {
-  title: "Victor Herrera",
+  title: "571's Website",
   description: "Victor's website to show off some of his skills.",
   icons: {
     icon: "/favicon.ico",
