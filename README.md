@@ -1,112 +1,51 @@
 
-## 
 ## API Route Handlers
-├───project     (GET default projects and POST new project)
-│   └───[id]    (GET specific project, PUT, and DELETE)
-├───projects    (GET all projects)
-├───resume      (GET default resume and POST new resume) 
-│   └───[id]    (GET specific resume, PUT, and DELETE) 
-└───resumes     (GET all projects)
+
+| Route            | Methods                   | Description                           |
+|------------------|---------------------------|---------------------------------------|
+| `/project`       | GET, POST                 | Get default project / create new      |
+| `/project/[id]`  | GET, PUT, DELETE          | Get / update / delete specific project|
+| `/projects`      | GET                       | Get all projects                      |
+| `/resume`        | GET, POST                 | Get default resume / create new       |
+| `/resume/[id]`   | GET, PUT, DELETE          | Get / update / delete specific resume |
+| `/resumes`       | GET                       | Get all resumes                       |
 
 ## Database Schema
-Resume
-├── _id: string
-├── name: string *
-├── title: string *
-├── headshot: ImageURL *
-│     ├── url: string *
-│     ├── alt?: string
-│     ├── width?: number
-│     └── height?: number
-├── email: string *
-├── githubUrl?: string
-├── linkedinUrl?: string
-├── website?: string
-├── summary?: string
-├── education?: [
-│     └── Education
-│         ├── institution: string *
-│         ├── degree: string *
-│         ├── fieldOfStudy: string *
-│         ├── startDate: string *
-│         ├── endDate?: string
-│         └── location?: string
-│ ]
-├── extracurriculars?: [
-│     └── Extracurricular
-│         ├── company: string *
-│         ├── role: string *
-│         ├── description?: string
-│         ├── startDate?: string
-│         ├── endDate?: string
-│         └── achievements?: [ string ]
-│ ]
-├── technicalSkills?: TechnicalSkills
-│     ├── languages?: [ string ]
-│     ├── frameworks?: [ string ]
-│     ├── databases?: [ string ]
-│     ├── tools?: [ string ]
-│     └── other?: [ string ]
-├── projects?: [ ObjectId (ref: Project) ]
-├── experience?: [
-│     └── Experience
-│         ├── company: string *
-│         ├── role: string *
-│         ├── startDate: string *
-│         ├── endDate?: string
-│         ├── location?: string
-│         ├── achievements: [ string ] *
-│         ├── tech?: [ string ]
-│         └── links?: [ Link ]
-│ ]
-├── volunteerWork?: [
-│     └── VolunteerWork
-│         ├── organization: string *
-│         ├── role: string *
-│         ├── startDate: string *
-│         ├── endDate?: string
-│         ├── location?: string
-│         └── links?: [ Link ]
-│ ]
-├── certifications?: [
-│     └── Certification
-│         ├── name: string *
-│         ├── issuer: string *
-│         ├── issueDate: string *
-│         ├── credentialId?: string
-│         ├── credentialUrl?: string
-│         ├── summary?: string
-│         └── links?: [ Link ]
-│ ]
-├── awards?: [
-│     └── Award
-│         ├── title: string *
-│         ├── organization?: string
-│         ├── date: string *
-│         ├── summary?: string
-│         └── links?: [ Link ]
-│ ]
-├── isDefault: boolean (default: false)
-└── timestamps: createdAt, updatedAt
 
-Project
-├── _id: string
-├── name: string *
-├── role: string *
-├── tech: [ string ]
-├── description?: string
-├── achievements?: [ string ]
-├── links?: [
-│     └── Link
-│         ├── label?: string
-│         └── url: string *
-│ ]
-├── screenshots: [
-│     └── ImageURL
-│         ├── url: string *
-│         ├── alt?: string
-│         ├── width?: number
-│         └── height?: number
-│ ]
-└── timestamps: createdAt, updatedAt
+### Resume
 
+| Field              | Type             | Required | Description |
+|--------------------|------------------|----------|-------------|
+| `_id`              | string           | ✅       | Unique identifier |
+| `name`             | string           | ✅       | Person’s full name |
+| `title`            | string           | ✅       | Professional title |
+| `headshot`         | ImageURL object  | ✅       | Profile image (url, alt?, width?, height?) |
+| `email`            | string           | ✅       | Contact email |
+| `githubUrl`        | string           | ❌       | GitHub profile link |
+| `linkedinUrl`      | string           | ❌       | LinkedIn profile link |
+| `website`          | string           | ❌       | Personal/portfolio site |
+| `summary`          | string           | ❌       | Professional summary |
+| `education`        | [Education]      | ❌       | List of schools, degrees, dates |
+| `extracurriculars` | [Extracurricular]| ❌       | Clubs, orgs, activities |
+| `technicalSkills`  | Object           | ❌       | Languages, frameworks, databases, tools, other |
+| `projects`         | [ObjectId]       | ❌       | References to Project collection |
+| `experience`       | [Experience]     | ❌       | Work experience details |
+| `volunteerWork`    | [VolunteerWork]  | ❌       | Volunteer roles and orgs |
+| `certifications`   | [Certification]  | ❌       | Certifications and credentials |
+| `awards`           | [Award]          | ❌       | Awards and honors |
+| `isDefault`        | boolean          | ❌       | Default resume flag (default: false) |
+| `timestamps`       | object           | ✅       | `createdAt`, `updatedAt` |
+
+### Project
+
+| Field          | Type             | Required | Description |
+|----------------|------------------|----------|-------------|
+| `_id`          | string           | ✅       | Unique identifier |
+| `name`         | string           | ✅       | Project name |
+| `role`         | string           | ✅       | Role in project |
+| `tech`         | [string]         | ✅       | Tech stack used |
+| `description`  | string           | ❌       | Short project description |
+| `achievements` | [string]         | ❌       | Key accomplishments |
+| `links`        | [Link]           | ❌       | Related URLs |
+| `screenshots`  | [ImageURL]       | ✅       | Screenshots of project |
+| `timestamps`   | object           | ✅       | `createdAt`, `updatedAt` |
