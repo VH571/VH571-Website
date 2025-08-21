@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { Resume, ResumeModel } from "@/models/resume";
+import { ResumeModel } from "@/models/resume";
 import mongoose from "mongoose";
 import { MongoServerError } from "mongodb";
 //get specific resume
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
-  const { id } = await params;
+  const { id } =  await params;
   if (!mongoose.isValidObjectId(id)) {
     return NextResponse.json({ error: "Invalid resume ID" }, { status: 400 });
   }
@@ -22,8 +22,8 @@ export async function GET(
 
 //edit specific resume
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
   const { id } = await params;
@@ -52,8 +52,8 @@ export async function PUT(
 
 //delete specific resume
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
   const { id } = await params;

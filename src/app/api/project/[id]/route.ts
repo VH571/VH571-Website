@@ -1,12 +1,11 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { ProjectModel } from "@/models/project";
-import { MongoServerError } from "mongodb";
 import mongoose from "mongoose";
 //get specific project
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
   const { id } = await params;
@@ -22,8 +21,8 @@ export async function GET(
 
 //edit specific project
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
   const { id } = await params;
@@ -43,6 +42,7 @@ export async function PUT(
       project: newproject,
     });
   } catch (err) {
+    console.error(err);
     return NextResponse.json(
       { error: "Failed at updating project" },
       { status: 500 }
@@ -52,8 +52,8 @@ export async function PUT(
 
 //delete specific project
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectDB();
   const { id } = await params;
@@ -65,7 +65,6 @@ export async function DELETE(
     if (!deleted) {
       return NextResponse.json({ error: "project not found" }, { status: 404 });
     }
-
     return NextResponse.json({
       message: "project deleted",
       id,

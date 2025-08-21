@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { ResumeModel } from "@/models/resume";
 
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 //creates new resume
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   await connectDB();
   const resume = await request.json();
   const newResume = new ResumeModel(resume);
