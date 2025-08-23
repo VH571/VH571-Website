@@ -1,9 +1,8 @@
 import { Box } from "@chakra-ui/react";
-
-export default function ResumeSection() {
-    return (
-        <Box>
-            I shoud now get this in the center
-        </Box>);
-
+import { Section, Education } from "@/models/resume";
+type Props = {
+  section: Section[];
+};
+export default function EducationSection({ section }: Props) {
+  return <Box></Box>;
 }
