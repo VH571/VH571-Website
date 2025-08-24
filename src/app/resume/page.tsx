@@ -1,7 +1,15 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, VStack } from "@chakra-ui/react";
 import { Resume } from "@/models/resume";
 import { getDefaultResume } from "@/lib/resumeService";
-import EducationSection from "@/components/ResumeSection";
+import {
+  EducationSection,
+  ExtracurricularSection,
+  ExperienceSection,
+  VolunteerSection,
+  SkillsSection,
+  CertificationsSection,
+  AwardsSection,
+} from "@/components/ResumeSection";
 export default async function ResumePage() {
   let defaultResume: Resume | null = null;
   try {
@@ -27,12 +35,18 @@ export default async function ResumePage() {
         height: "100vh",
         columnWidth: "20rem",
         columnGap: "1.5rem",
-        //columnRule: "2px dashed #666",
         columnFill: "auto",
       }}
     >
-      <EducationSection education ={defaultResume.education ?? []} />
-      
+      <EducationSection education={defaultResume.education ?? []} />
+      <ExperienceSection experience={defaultResume.experience ?? []} />
+      <ExtracurricularSection
+        extracurricular={defaultResume.extracurriculars ?? []}
+      />
+      <SkillsSection technicalSkills={defaultResume.technicalSkills} />
+      <VolunteerSection volunteerWork={defaultResume.volunteerWork} />
+      <CertificationsSection certifications={defaultResume.certifications} />
+      <AwardsSection awards={defaultResume.awards} />
     </Box>
   );
 }

@@ -21,24 +21,24 @@
   --color-twilight: var(--palette-twilight-indigo);
   --color-lapis: var(--palette-lapis-night);
 
-  --color-bg: var(--palette-lapis-night);
-  --color-fg: var();
+  --color-bg: var(--palette-seashell);
+  --color-fg: var(--palette-twilight-indigo);
   --color-text: var(--palette-woodsmoke);
 
   --color-accent: var(--palette-neon-orchid);
   --color-accent-alt: var(--palette-lavender-pulse);
-  --color-accent-contrast: var(--palette-woodsmoke);
+  --color-accent-contrast: var(--palette-seashell);
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  
-  --color-bg-muted: color-mix(
+
+  --color-bg-muted: color-mix(in srgb, var(--palette-seashell) 85%, white 15%);
+  --color-fg-muted: color-mix(
     in srgb,
-    var(--palette-pickled-bluewood) 85%,
-    white 15%
+    var(--palette-twilight-indigo) 70%,
+    black 30%
   );
-  --color-fg-muted: color-mix(in srgb, var(--palette-seashell) 70%, black 30%);
   --color-border: color-mix(
     in srgb,
     var(--palette-pickled-bluewood) 75%,
@@ -47,8 +47,6 @@
 
   --font-sans: "Rubik", sans-serif;
 }
-
-
 
 body {
   background: var(--color-bg);

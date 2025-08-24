@@ -28,7 +28,8 @@ export type Section =
   | TechnicalSkills
   | Experience
   | VolunteerWork
-  | Certification;
+  | Certification
+  | Award;
 
 export type Education = {
   _id?: string;
