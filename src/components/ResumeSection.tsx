@@ -58,11 +58,12 @@ type Props = {
 };
 
 export function EducationSection({ education }: Props) {
+  if (!education?.length) return null;
   return (
     <Box
       as="section"
       mb={10}
-      //display="inline-block"
+      display="inline-block"
       w="100%"
       verticalAlign="top"
     >
@@ -373,7 +374,7 @@ export function CertificationsSection({ certifications }: Props) {
       verticalAlign="top"
     >
       <SectionHeader jp="サーティフィケーション" en="Certifications" />
-      <VStack align="start" gap={2} >
+      <VStack align="start" gap={2}>
         {certifications.map((item, index) => (
           <Box
             key={index}
@@ -392,18 +393,15 @@ export function CertificationsSection({ certifications }: Props) {
             >
               {item.issuer}
             </Text>
-            <Text fontSize="sm" fontWeight="bold">
-              {fmtMY(item.issueDate)}
+            <Text fontSize="xs">
+              {item.credentialId
+                ? `Credential ID: ${item.credentialId} ·  ${fmtMY(
+                    item.issueDate
+                  )}`
+                : fmtMY(item.issueDate)}
             </Text>
-
-            {item.credentialId ? (
-              <Text fontSize="xs" mt={1}>
-                Credential ID: {item.credentialId}
-              </Text>
-            ) : null}
-
             {item.summary ? (
-              <Text fontSize="sm" mt={2}>
+              <Text fontSize="sm" mt={1}>
                 {item.summary}
               </Text>
             ) : null}
@@ -471,13 +469,13 @@ export function AwardsSection({ awards }: Props) {
             </Text>
 
             {item.summary ? (
-              <Text fontSize="sm" mt={2}>
+              <Text fontSize="sm" mt={1}>
                 {item.summary}
               </Text>
             ) : null}
 
             {item.links?.length ? (
-              <Text mt={2} fontSize="xs">
+              <Text mt={1} fontSize="xs">
                 {item.links.map((l, j) => (
                   <Link
                     as={Link}
