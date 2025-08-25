@@ -22,6 +22,15 @@ export interface Resume {
   isDefault: boolean;
 }
 
+export type Section =
+  | Education
+  | Extracurricular
+  | TechnicalSkills
+  | Experience
+  | VolunteerWork
+  | Certification
+  | Award;
+
 export type Education = {
   _id?: string;
   institution: string;
