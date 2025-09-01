@@ -1,16 +1,25 @@
 import { Box } from "@chakra-ui/react";
+import ModelViewer from "@/components/ModelView";
+import { Resume } from "@/models/resume";
+import { getDefaultResume } from "@/lib/resumeService";
 
-export default function Home() {
+type ResumeResult = Resume | { error: string } | null;
+
+export default async function Home() {
+  let defaultResume: ResumeResult = null;
+  try {
+    defaultResume = await getDefaultResume();
+  } catch (err) {
+    throw new Error(`Could not fetch default resume: error ${err}`);
+  }
+
+  if (!defaultResume || "error" in defaultResume) {
+    throw new Error(defaultResume?.error ?? "No default resume found.");
+  }
+
   return (
-    <Box>
-      {/* 
-        1. Create scene
-        2. Add the camra
-        3. Create objects
-        4. Add lighting
-        5. Set up the renderer
-        6. animate the scene*/}
-      Home
+    <Box height={"vh"}>
+      <ModelViewer modelPath={"/models/starbucks_disposable_cup.glb"} />
     </Box>
   );
 }
