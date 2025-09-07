@@ -6,15 +6,20 @@ import { ProjectModel } from "@/models/project";
 //get defaut resume projects
 export async function GET() {
   await connectDB();
-  const resume = await ResumeModel.findOne({ isDefault: true }).lean();
+  const resume = await ResumeModel.findOne({ isDefault: true })
+    .select("projects")
+    .populate({
+      path: "projects",
+      select: "_id name role tech description achievements links screenshots",
+    })
+    .lean();
   if (!resume) {
     return NextResponse.json(
       { error: "No default resume set" },
       { status: 404 }
     );
   }
-  const projects = await ProjectModel.findById(resume.projects);
-
+  const projects = (resume.projects ?? []) as unknown[];
   return NextResponse.json(projects);
 }
 //creates new project

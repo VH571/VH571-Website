@@ -7,7 +7,7 @@ export default function Loading() {
     <Center h="100vh" w="100%">
       <VStack>
         <Spinner size="xl" borderWidth="4px" />
-        <Text mt={2} color="gray.500">Loading your resume…</Text>
+        <Text mt={2} color="gray.500">Loading resume…</Text>
       </VStack>
     </Center>
   );

@@ -65,7 +65,7 @@ export function EducationSection({ education }: Props) {
       mb={10}
       display="inline-block"
       w="100%"
-      verticalAlign="top"
+      //verticalAlign="top"
     >
       <SectionHeader jp="エジュケーション" en="Education" />
 
@@ -118,7 +118,7 @@ export function ExperienceSection({ experience }: Props) {
       mb={10}
       display="inline-block"
       w="100%"
-      verticalAlign="top"
+      //verticalAlign="top"
     >
       <SectionHeader jp="エクスペリエンス" en="Experience" />
       <VStack align="start" gap={2}>
@@ -208,7 +208,7 @@ export function ExtracurricularSection({ extracurricular }: Props) {
       mb={10}
       display="inline-block"
       w="100%"
-      verticalAlign="top"
+      //verticalAlign="top"
     >
       <SectionHeader jp="エクストラカリキュラー" en="Extra Curriculars" />
       <VStack align="start" gap={2}>
@@ -273,7 +273,11 @@ export function SkillsSection({ technicalSkills }: Props) {
   ].filter((category) => category.items?.length);
 
   return (
-    <Box as="section" mb={10} w="100%" verticalAlign="top">
+    <Box as="section" 
+      mb={10} 
+      w="100%" 
+      //verticalAlign="top"
+      >
       <SectionHeader jp="テクニカルスキル" en="Technical Skills" />
       <VStack align="start" gap={2}>
         <Box borderLeft="3px solid" borderColor="var(--color-accent)" pl={4}>
@@ -301,7 +305,7 @@ export function VolunteerSection({ volunteerWork }: Props) {
       mb={10}
       display="inline-block"
       w="100%"
-      verticalAlign="top"
+      //verticalAlign="top"
     >
       <SectionHeader jp="ボランティアワーク" en="Volunteer Work" />
 
@@ -371,7 +375,7 @@ export function CertificationsSection({ certifications }: Props) {
       mb={10}
       //display="inline-block"
       w="100%"
-      verticalAlign="top"
+      //verticalAlign="top"
     >
       <SectionHeader jp="サーティフィケーション" en="Certifications" />
       <VStack align="start" gap={2}>
@@ -439,7 +443,7 @@ export function AwardsSection({ awards }: Props) {
       mb={10}
       display="inline-block"
       w="100%"
-      verticalAlign="top"
+      //verticalAlign="top"
     >
       <SectionHeader jp="アワード" en="Awards" />
 

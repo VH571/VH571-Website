@@ -18,27 +18,26 @@ export default async function ResumePage() {
   try {
     defaultResume = await getDefaultResume();
   } catch (err) {
-    throw new Error("Could not fetch default resume.");
+    throw new Error(`Could not fetch default resume. ${err}`);
   }
 
   if (!defaultResume || "error" in defaultResume) {
     throw new Error(defaultResume?.error ?? "No default resume found.");
   }
-
+  
   return (
+    
     <Box
       as="article"
       maxW="10xl"
+      height={"100vh"}
       mx="auto"
       p={6}
       overflowX="auto"
       overflowY="hidden"
-      style={{
-        height: "100vh",
-        columnWidth: "20rem",
-        columnGap: "1.5rem",
-        columnFill: "auto",
-      }}
+      columnFill={"balance"}
+      columnGap={"1.5rem"}
+      columnWidth={"20rem"}
     >
       <Box as="section" mb={10} w="100%" textAlign="center">
         <VStack gap={2} align="center">

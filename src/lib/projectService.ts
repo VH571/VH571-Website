@@ -3,7 +3,7 @@ import { Project } from "@/models/project";
 const baseUrl = getBaseUrl();
 
 //get default project
-export async function getDefaultProject() {
+export async function getDefaultProjects() {
   const response = await fetch(`${baseUrl}/api/project`);
   return response.json();
 }

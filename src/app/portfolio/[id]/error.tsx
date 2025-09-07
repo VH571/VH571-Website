@@ -12,7 +12,7 @@ export default function Error({
   return (
     <Center h="100vh" w="100%">
       <VStack>
-        <Text fontSize="lg" fontWeight="bold">Failed to load projects</Text>
+        <Text fontSize="lg" fontWeight="bold">Failed to load resume</Text>
         <Text color="gray.500" maxW="480px" textAlign="center">
           {error.message || "Something went wrong."}
         </Text>
