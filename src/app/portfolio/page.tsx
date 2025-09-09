@@ -1,17 +1,7 @@
 import { ProjectGrid } from "@/components/ProjectSection";
-import ProjectSection from "@/components/ProjectSection";
 import { getDefaultProjects } from "@/lib/projectService";
 import { Project } from "@/models/project";
-import {
-  Box,
-  Grid,
-  IconButton,
-  HStack,
-  Button,
-  useBreakpointValue,
-  VisuallyHidden,
-  Center,
-} from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 type ProjectResult = Project[] | { error: string };
 
 export default async function PortfolioPage() {
@@ -33,6 +23,7 @@ export default async function PortfolioPage() {
       display={"flex"}
       justifyContent={"center"}
       alignItems={"center"}
+      px={"30px"}
     >
       <ProjectGrid projects={defaultProjects} />
     </Box>

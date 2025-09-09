@@ -34,7 +34,7 @@ export default async function ResumePage() {
       mx="auto"
       p={6}
       overflowX="auto"
-      overflowY="hidden"
+      overflowY="auto"
       columnFill={"balance"}
       columnGap={"1.5rem"}
       columnWidth={"20rem"}

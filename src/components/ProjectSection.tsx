@@ -16,11 +16,17 @@ import {
   ButtonGroup,
   VStack,
   Tag,
+  Text,
 } from "@chakra-ui/react";
 
 export default function ProjectCard({ project }: { project: Project }) {
   return (
-    <Card.Root maxW="md" variant={"subtle"} overflow={"hidden"} bg = {"var(--color-bg)"}>
+    <Card.Root
+      maxW="md"
+      variant={"elevated"}
+      overflow={"hidden"}
+      bg={"none"}
+    >
       <Image
         src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?..."
         alt="Green double couch with wooden legs"
@@ -30,7 +36,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       />
 
       <Card.Body gap="2">
-        <Card.Title>{project.name}</Card.Title>
+        <Card.Title color={"var(--color-fg)"}>{project.name}</Card.Title>
         <Card.Description
           display="-webkit-box"
           overflow="hidden"
@@ -39,21 +45,44 @@ export default function ProjectCard({ project }: { project: Project }) {
             WebkitBoxOrient: "vertical",
             WebkitLineClamp: 2,
           }}
+          color="gray.500"
         >
-          {project.description}
+          {project.description
+            ? project.description
+            : "No description available"}
         </Card.Description>
         <HStack>
-          {project.tech?.map((item, i) => (
-            <Tag.Root key={i} size="sm" textOverflow="ellipsis">
-              <Tag.Label>{item}</Tag.Label>
-            </Tag.Root>
-          ))}
+          {project.tech && project.tech.length > 0 ? (
+            project.tech.map((item, i) => (
+              <Tag.Root
+                key={i}
+                size="sm"
+                textOverflow="ellipsis"
+                variant="subtle"
+                bg="var(--color-fg)"
+                color="var(--palette-seashell)"
+              >
+                <Tag.Label>{item}</Tag.Label>
+              </Tag.Root>
+            ))
+          ) : (
+            <span style={{ fontSize: "0.75rem", color: "var(--color-fg)" }}>
+              No tech listed
+            </span>
+          )}
         </HStack>
       </Card.Body>
-       
+
       <Card.Footer gap="2">
         <ChakraLink as={NextLink} href={`/portfolio/${project._id}`}>
-          <Button variant="outline">View Project</Button>
+          <Button
+            variant="ghost"
+            color={"var(--color-accent)"}
+            borderColor={"var(--color-accent)"}
+            _hover={{ bg: "var(--color-accent)", color: "var(--color-bg)" }}
+          >
+            View Project
+          </Button>
         </ChakraLink>
 
         {project.links?.[0] && (
@@ -62,7 +91,9 @@ export default function ProjectCard({ project }: { project: Project }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button>{project.links[0].label ?? "Visit"}</Button>
+            <Button bg={"var(--color-accent)"} color={"var(--color-bg)"}>
+              {project.links[0].label ?? "Visit"}
+            </Button>
           </ChakraLink>
         )}
       </Card.Footer>
@@ -83,7 +114,7 @@ export function ProjectGrid({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <VStack>
+    <VStack gap ={4}>
       <SimpleGrid columns={{ md: 1, lg: 2, xl: 3 }} gap={7} gridAutoRows="1fr">
         {visibleItems.map((project) => (
           <ProjectCard key={project._id} project={project} />

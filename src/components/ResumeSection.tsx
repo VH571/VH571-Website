@@ -92,13 +92,13 @@ export function EducationSection({ education }: Props) {
 
             <Text fontSize="sm" fontWeight="bold">
               {[
-                item.location,
                 [
                   fmtMY(item.startDate),
                   item.endDate ? fmtMY(item.endDate) : "Present",
                 ]
                   .filter(Boolean)
                   .join(" – "),
+                item.location,
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -142,13 +142,13 @@ export function ExperienceSection({ experience }: Props) {
             </Text>
             <Text fontSize="sm" fontWeight="bold">
               {[
-                item.location,
                 [
                   fmtMY(item.startDate),
                   item.endDate ? fmtMY(item.endDate) : "Present",
                 ]
                   .filter(Boolean)
                   .join(" – "),
+                item.location,
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -273,11 +273,13 @@ export function SkillsSection({ technicalSkills }: Props) {
   ].filter((category) => category.items?.length);
 
   return (
-    <Box as="section" 
-      mb={10} 
-      w="100%" 
+    <Box
+      as="section"
+      mb={10}
+      w="100%"
+      display="inline-block"
       //verticalAlign="top"
-      >
+    >
       <SectionHeader jp="テクニカルスキル" en="Technical Skills" />
       <VStack align="start" gap={2}>
         <Box borderLeft="3px solid" borderColor="var(--color-accent)" pl={4}>
@@ -330,13 +332,13 @@ export function VolunteerSection({ volunteerWork }: Props) {
             </Text>
             <Text fontSize="sm" fontWeight="bold">
               {[
-                item.location,
                 [
                   fmtMY(item.startDate),
                   item.endDate ? fmtMY(item.endDate) : "Present",
                 ]
                   .filter(Boolean)
                   .join(" – "),
+                item.location,
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -373,7 +375,7 @@ export function CertificationsSection({ certifications }: Props) {
     <Box
       as="section"
       mb={10}
-      //display="inline-block"
+      display="inline-block"
       w="100%"
       //verticalAlign="top"
     >
