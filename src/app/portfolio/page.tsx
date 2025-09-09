@@ -10,6 +10,7 @@ import {
   Button,
   useBreakpointValue,
   VisuallyHidden,
+  Center,
 } from "@chakra-ui/react";
 type ProjectResult = Project[] | { error: string };
 
@@ -27,9 +28,13 @@ export default async function PortfolioPage() {
   }
 
   return (
-    <Box>
-      <ProjectGrid projects={defaultProjects}/>
-
+    <Box
+      minH="dvh"
+      display={"flex"}
+      justifyContent={"center"}
+      alignItems={"center"}
+    >
+      <ProjectGrid projects={defaultProjects} />
     </Box>
   );
 }
