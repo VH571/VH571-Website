@@ -3,8 +3,6 @@ import "./globals.css";
 import { Provider } from "@/components/ui/provider";
 import Navbar from "@/components/Navbar";
 import { Box, Flex } from "@chakra-ui/react";
-import { ColorModeProvider } from "@/components/ui/color-mode";
-import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 
 export const metadata: Metadata = {
   title: "571's Website",
@@ -20,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html className={"website"} suppressHydrationWarning lang="en">
       <body>
         <Provider>
           <Flex font={"var(--font-sans)"} h="100dvh" overflow="hidden">

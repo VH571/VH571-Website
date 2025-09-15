@@ -1,5 +1,6 @@
 import { Box } from "@chakra-ui/react";
 import ModelViewer from "@/components/ModelView";
+import OceanViewer from "@/components/OceanViewer";
 import { Resume } from "@/models/resume";
 import { getDefaultResume } from "@/lib/resumeService";
 
@@ -19,7 +20,7 @@ export default async function Home() {
 
   return (
     <Box height={"vh"}>
-      <ModelViewer modelPath={"/models/starbucks_disposable_cup.glb"} />
+       <OceanViewer height="100vh" />
     </Box>
   );
 }
