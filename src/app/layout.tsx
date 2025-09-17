@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className={"website"} suppressHydrationWarning lang="en">
+    <html lang='en' suppressHydrationWarning>
       <body>
         <Provider>
           <Flex font={"var(--font-sans)"} h="100dvh" overflow="hidden">
