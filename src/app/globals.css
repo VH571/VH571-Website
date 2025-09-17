@@ -1,18 +1,14 @@
-@import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
-
 :root {
+  /* === Base palette (unchanged) === */
   --palette-neon-orchid: #d9a0cf;
   --palette-opera-mauve: #bf88b0;
   --palette-lavender-pulse: #9a75bf;
   --palette-twilight-indigo: #55468c;
   --palette-lapis-night: #0e3a73;
-
   --palette-seashell: #f1f0f2;
   --palette-woodsmoke: #0b0c0d;
-}
 
-@theme inline {
+  /* === Semantic roles (unchanged hues; tidy references) === */
   --color-seashell: var(--palette-seashell);
   --color-woodsmoke: var(--palette-woodsmoke);
   --color-orchid: var(--palette-neon-orchid);
@@ -21,6 +17,7 @@
   --color-twilight: var(--palette-twilight-indigo);
   --color-lapis: var(--palette-lapis-night);
 
+  /* App roles */
   --color-bg: var(--palette-seashell);
   --color-fg: var(--palette-twilight-indigo);
   --color-text: var(--palette-woodsmoke);
@@ -33,17 +30,10 @@
   --color-warning: #f59e0b;
   --color-error: #ef4444;
 
+  /* Fix: use an existing palette color (no new hues) */
   --color-bg-muted: color-mix(in srgb, var(--palette-seashell) 85%, white 15%);
-  --color-fg-muted: color-mix(
-    in srgb,
-    var(--palette-twilight-indigo) 70%,
-    black 30%
-  );
-  --color-border: color-mix(
-    in srgb,
-    var(--palette-pickled-bluewood) 75%,
-    white 25%
-  );
+  --color-fg-muted: color-mix(in srgb, var(--palette-twilight-indigo) 70%, black 30%);
+  --color-border: var(--palette-twilight-indigo);
 
   --font-sans: "Rubik", sans-serif;
 }
