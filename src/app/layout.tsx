@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html className={"website"} suppressHydrationWarning lang="en">
       <body>
-        <Provider>
+        <Provider >
           <Flex font={"var(--font-sans)"} h="100dvh" overflow="hidden">
             <Box
               as="aside"

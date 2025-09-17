@@ -1,45 +1,56 @@
-import {
-  Center,
-  VStack,
-  Text,
-  Tabs,
-  useBreakpointValue,
-} from "@chakra-ui/react";
-import { getAllResumes } from "@/lib/resumeService";
-import { Resume } from "@/models/resume";
 import { LuFileUser, LuFileCode } from "react-icons/lu";
-import { color } from "three/tsl";
-type ResumesLst = Resume | { error: string } | null;
+import { ResumeTab, ProjectTab } from "@/components/AdminTabs";
+import { getAllResumes } from "@/lib/resumeService";
+import { getAllProjects } from "@/lib/projectService";
+import { Tabs } from "@chakra-ui/react";
+import { Resume } from "@/models/resume";
+import { Project } from "@/models/project";
+
+type ResumesLst = Resume[] | { error: string } | null;
+type ProjectLst = Project[] | { error: string } | null;
 
 export default async function Admin() {
-  let defaultResume: ResumesLst = null;
-  try {
-    defaultResume = await getAllResumes();
-  } catch (err) {
-    throw new Error(`Could not fetch resumes. ${err}`);
-  }
+  let resumeList: ResumesLst = null;
+  let projectList: ProjectLst = null;
 
-  if (!defaultResume || "error" in defaultResume) {
-    throw new Error(defaultResume?.error ?? "No resumes found.");
+  try {
+    resumeList = await getAllResumes();
+    projectList = await getAllProjects();
+  } catch (err) {
+    throw new Error(`Could not fetch resumes or projects. ${err}`);
+  }
+  
+  if (!resumeList || "error" in resumeList) {
+    throw new Error(resumeList?.error ?? "No resumes found.");
+  }
+  if (!projectList || "error" in projectList) {
+    throw new Error(projectList?.error ?? "No projects found.");
   }
   return (
-    <Tabs.Root defaultValue="resumes" variant={"line"} size={"lg"}
-    style={{
-    "--tabs-indicator-shadow": "var(--color-accent)",
-    "--tabs-indicator-bg": "var(--color-accent)",
-  } as React.CSSProperties}>
-      <Tabs.List >
-        <Tabs.Trigger value="resumes" >
+    <Tabs.Root
+      defaultValue="resumes"
+      variant="line"
+      size="lg"
+      colorPalette="brand"
+      padding={"20px"}
+      justify={"center"}
+    >
+      <Tabs.List>
+        <Tabs.Trigger value="resumes" fontWeight={"bold"} fontSize="2rem">
           <LuFileUser />
-          Resumes
+          RESUME
         </Tabs.Trigger>
-        <Tabs.Trigger value="projects">
+        <Tabs.Trigger value="projects" fontWeight={"bold"} fontSize="2rem">
           <LuFileCode />
-          Projects
+          PROJECTS
         </Tabs.Trigger>
       </Tabs.List>
-      <Tabs.Content value="resumes">Manage your team members</Tabs.Content>
-      <Tabs.Content value="projects">Manage your projects</Tabs.Content>
+      <Tabs.Content value="resumes">
+        <ResumeTab resumeList={resumeList} />
+      </Tabs.Content>
+      <Tabs.Content value="projects">
+        <ProjectTab projectList={projectList}/>
+      </Tabs.Content>
     </Tabs.Root>
   );
 }
