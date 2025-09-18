@@ -18,7 +18,7 @@ import React, { useState, useMemo } from "react";
 import NextLink from "next/link";
 export default function ProjectCard({ project }: { project: Project }) {
   return (
-    <Card.Root maxW="md" variant={"subtle"} overflow={"hidden"} bg={"none"}>
+    <Card.Root maxW="380px" variant={"subtle"} overflow={"hidden"} bg={"none"}>
       <Image
         src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?..."
         alt="Green double couch with wooden legs"
@@ -155,7 +155,7 @@ export function ProjectCarousel({ projects }: { projects: Project[] }) {
           return (
             <Carousel.Item key={`page-${pageIdx}`}>
               <SimpleGrid
-                columns={{ md: 1, lg: 2, xl: 3 }}
+                columns={{ sm: 1, md: 2, xl: 3 }}
                 gap={7}
                 gridAutoRows="1fr"
               >

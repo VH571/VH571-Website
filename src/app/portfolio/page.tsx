@@ -20,7 +20,8 @@ export default async function PortfolioPage() {
   return (
     <Box
     as="section"
-    maxW="8xl"          
+    maxW={{sm: "sm", md: "3xl", xl: "7xl"}}
+    maxH="100%"         
     mx="auto"
     px={{ base: 4, md: 6 }}
     py={{ base: 6, md: 10 }}
