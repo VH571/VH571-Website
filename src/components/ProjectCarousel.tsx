@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import "@/styles/bootstrap-carousel.scss";
 import { Project } from "@/models/project";
-import { GrFormNext, GrFormPrevious} from "react-icons/gr";
+import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import Carousel from "react-bootstrap/Carousel";
 import "@/styles/bootstrap-carousel.scss";
 import React, { useState, useMemo } from "react";
@@ -137,7 +137,7 @@ export function ProjectCarousel({ projects }: { projects: Project[] }) {
           width: "auto",
           padding: "8px 8px",
           opacity: 1,
-        }, 
+        },
         "& .visually-hidden": { display: "none" },
       }}
     >
@@ -147,8 +147,8 @@ export function ProjectCarousel({ projects }: { projects: Project[] }) {
         interval={null}
         slide
         wrap={false}
-        nextIcon={<GrFormNext color="var(--color-accent)" size="2rem"/>}
-        prevIcon={<GrFormPrevious color="var(--color-accent)" size="2rem"/>}
+        nextIcon={<GrFormNext color="var(--color-accent)" size="2rem" />}
+        prevIcon={<GrFormPrevious color="var(--color-accent)" size="2rem" />}
       >
         {pages.map((pageItems, pageIdx) => {
           const padCount = itemsPerPage - pageItems.length;

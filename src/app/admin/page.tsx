@@ -34,6 +34,7 @@ export default async function Admin() {
       colorPalette="brand"
       padding={"20px"}
       justify={"center"}
+      minW={"350px"}
     >
       <Tabs.List>
         <Tabs.Trigger value="resumes" fontWeight={"bold"} fontSize="2rem">
