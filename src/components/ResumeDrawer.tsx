@@ -15,15 +15,15 @@ export default function ResumePortal({
       {containerRef && (
         <Portal container={containerRef ?? ""}>
           <Drawer.Backdrop />
-          <Drawer.Positioner position="absolute" w="100%" padding = {"20px"}>
+          <Drawer.Positioner position="absolute" w="100%" padding={"20px"}>
             <Drawer.Content
               w="95%"
               bg={"var(--color-seashell)"}
               mx={"auto"}
               minH={"320px"}
-              maxH= {"940px"}
+              maxH={"940px"}
               minW={"320px"}
-              maxW= {"940px"}
+              maxW={"940px"}
               ref={bodyRef}
               overflow={"scroll"}
             >

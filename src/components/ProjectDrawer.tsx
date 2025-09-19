@@ -13,17 +13,17 @@ import {
   Button,
   Image,
   VisuallyHidden,
+  BoxProps,
 } from "@chakra-ui/react";
 import { HiOutlineExternalLink } from "react-icons/hi";
 import * as React from "react";
 import { Project } from "@/models/project";
 import { useRouter } from "next/router";
 import { ImageCarousel } from "./ImageCarousel";
-function Section({
-  title,
-  children,
-  ...rest
-}: React.PropsWithChildren<{ title: string } & Record<string, any>>) {
+
+
+type SectionProps = { title: string; children: React.ReactNode };
+const Section = ({ title, children, ...rest }: SectionProps & BoxProps) => {
   return (
     <Box {...rest}>
       <Heading as="h3" size="sm" letterSpacing="wide" mb={2}>
@@ -32,7 +32,7 @@ function Section({
       {children}
     </Box>
   );
-}
+};
 
 function Muted({ children }: { children: React.ReactNode }) {
   return (
@@ -62,31 +62,19 @@ export default function ProjectPortal({
             ref={bodyRef}
             role="dialog"
             aria-labelledby="project-title"
-            w="96%"
             maxW="960px"
             mx="auto"
             minH="320px"
-            maxH="960"
+            maxH="960px"
             overflow="auto"
             bg="bg"
-            color="text"
-            border="1px solid"
-            borderColor="border"
-            borderRadius="0"
-            boxShadow="sm"
-            outline="1px solid transparent"
-            _focusWithin={{
-              outlineColor: "brand.focusRing",
-              outlineOffset: 0,
-            }}
           >
             <Drawer.Header
               position="sticky"
               top={0}
               zIndex={1}
-              bg="bg"
               borderBottom="1px solid"
-              borderColor="border"
+              borderColor={"var(--color-accent)"}
               px={{ base: 3, md: 5 }}
               py={{ base: 2, md: 3 }}
             >
@@ -119,9 +107,14 @@ export default function ProjectPortal({
               </Drawer.CloseTrigger>
             </Drawer.Header>
 
-            <Drawer.Body px={{ base: 3, md: 5 }} py={{ base: 3, md: 4 }}>
+            <Drawer.Body
+              borderBottom="1px solid"
+              borderColor={"var(--color-accent)"}
+              px={{ base: 3, md: 5 }}
+              py={{ base: 3, md: 4 }}
+            >
               {project.screenshots?.length ? (
-                <Box maxW="500px" mx = {"auto"}>
+                <Box maxW="500px" mx={"auto"}>
                   <ImageCarousel
                     name={project.name}
                     screenshots={project.screenshots}
@@ -136,6 +129,7 @@ export default function ProjectPortal({
                 alignItems="start"
               >
                 <Stack gap={4}>
+                  {/* About Section */}
                   <Section title="About">
                     {project.description?.trim() ? (
                       <Text>{project.description.trim()}</Text>
@@ -143,7 +137,7 @@ export default function ProjectPortal({
                       <Muted>No description provided.</Muted>
                     )}
                   </Section>
-
+                  {/* Tech Section */}
                   <Section title="Tech">
                     {project.tech?.length ? (
                       <Wrap gap="6px">
@@ -167,7 +161,7 @@ export default function ProjectPortal({
                       <Muted>No technologies listed.</Muted>
                     )}
                   </Section>
-
+                  {/* Achivements */}
                   <Section title="Key Achievements">
                     {project.achievements?.length ? (
                       <Stack as="ul" gap={2} pl={5} lineHeight="shorter">
@@ -181,10 +175,10 @@ export default function ProjectPortal({
                       <Muted>No achievements added yet.</Muted>
                     )}
                   </Section>
-
+                  {/* Links */}
                   <Section title="Links">
                     {project.links?.length ? (
-                      <Stack gap={2}>
+                      <HStack gap={2}>
                         {project.links.map((l, i) => {
                           const label =
                             l.label?.trim() ||
@@ -200,34 +194,34 @@ export default function ProjectPortal({
                             })();
 
                           return (
-                            <Button
+                            <Tag.Root
                               key={`${l.url}-${i}`}
                               asChild
-                              variant="ghost"
-                              justifyContent="space-between"
-                              borderRadius="0"
-                              border="1px solid"
-                              borderColor="border"
+                              borderRadius="2px"
                               _hover={{
-                                bg: "surface",
-                                color: "colorPalette.contrast",
+                                bg: "var(--color-accent)",
+                                color: "var(--color-seashell)",
                               }}
-                              _active={{ transform: "translateY(0)" }}
                               height="36px"
-                              px={2}
+                              p={"2"}
                             >
-                              <Link
-                                href={l.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <VisuallyHidden>Open </VisuallyHidden>
-                                {label}
-                              </Link>
-                            </Button>
+                              <Tag.Label>
+                                <Link
+                                  href={l.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <VisuallyHidden>Open </VisuallyHidden>
+                                  {label}
+                                </Link>
+                              </Tag.Label>
+                              <Tag.EndElement>
+                                <HiOutlineExternalLink />
+                              </Tag.EndElement>
+                            </Tag.Root>
                           );
                         })}
-                      </Stack>
+                      </HStack>
                     ) : (
                       <Muted>No external links.</Muted>
                     )}
@@ -237,11 +231,10 @@ export default function ProjectPortal({
             </Drawer.Body>
 
             <Drawer.Footer
+              borderBottom="1px solid"
+              borderColor={"var(--color-accent)"}
               px={{ base: 3, md: 5 }}
               py={{ base: 2, md: 3 }}
-              borderTop="1px solid"
-              borderColor="border"
-              bg="bg"
             />
           </Drawer.Content>
         </Drawer.Positioner>
