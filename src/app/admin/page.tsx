@@ -19,7 +19,7 @@ export default async function Admin() {
   } catch (err) {
     throw new Error(`Could not fetch resumes or projects. ${err}`);
   }
-  
+
   if (!resumeList || "error" in resumeList) {
     throw new Error(resumeList?.error ?? "No resumes found.");
   }
@@ -35,6 +35,7 @@ export default async function Admin() {
       padding={"20px"}
       justify={"center"}
       minW={"350px"}
+      position="relative"
     >
       <Tabs.List>
         <Tabs.Trigger value="resumes" fontWeight={"bold"} fontSize="2rem">
@@ -50,7 +51,7 @@ export default async function Admin() {
         <ResumeTab resumeList={resumeList} />
       </Tabs.Content>
       <Tabs.Content value="projects">
-        <ProjectTab projectList={projectList}/>
+        <ProjectTab projectList={projectList} />
       </Tabs.Content>
     </Tabs.Root>
   );
