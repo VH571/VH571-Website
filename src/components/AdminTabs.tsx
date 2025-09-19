@@ -78,7 +78,7 @@ export function ProjectTab({ projectList }: { projectList: Project[] }) {
       }}
       w={"100%"}
     >
-      <Box position="relative" maxW="50%" minW="350px" mx="auto">
+      <Box position="relative" maxW="800px" minW="350px" mx="auto">
         <SearchBar value={q} onChange={setQ} placeholder="Search projects…" />
         <Text fontSize="sm">
           Showing {filtered.length} of {projectList.length}

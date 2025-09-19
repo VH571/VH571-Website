@@ -76,7 +76,7 @@ export default function SearchBar({
   placeholder = "Search…",
 }: Props) {
   return (
-    <InputGroup startElement={<IoMdSearch />} endElement={<Kbd>Enter</Kbd>}>
+    <InputGroup startElement={<IoMdSearch />} endElement={<Kbd >Enter</Kbd>}>
       <Input
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
