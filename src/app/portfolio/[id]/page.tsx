@@ -20,7 +20,7 @@ type Params = { params: { id: string } };
 
 export default async function PortfolioIDPage({ params }: Params) {
   let project: ProjectResult;
-  const { id } = await params;
+  const { id } = params;
   try {
     project = await getProjectByID(id);
   } catch (err) {
