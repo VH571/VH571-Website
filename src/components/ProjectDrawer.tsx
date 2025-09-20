@@ -21,12 +21,11 @@ import { Project } from "@/models/project";
 import { useRouter } from "next/router";
 import { ImageCarousel } from "./ImageCarousel";
 
-
 type SectionProps = { title: string; children: React.ReactNode };
 const Section = ({ title, children, ...rest }: SectionProps & BoxProps) => {
   return (
     <Box {...rest}>
-      <Heading as="h3" size="sm" letterSpacing="wide" mb={2}>
+      <Heading as="h3" size="sm" letterSpacing="wide" mb={1}>
         {title}
       </Heading>
       {children}
@@ -70,13 +69,13 @@ export default function ProjectPortal({
             bg="bg"
           >
             <Drawer.Header
-              position="sticky"
+              as="header"
               top={0}
               zIndex={1}
-              borderBottom="1px solid"
-              borderColor={"var(--color-accent)"}
               px={{ base: 3, md: 5 }}
-              py={{ base: 2, md: 3 }}
+              py={{ base: 3, md: 5 }}
+              borderBottom="1px solid"
+              borderColor="blackAlpha.200"
             >
               <Box pr={8}>
                 <Heading
@@ -122,120 +121,119 @@ export default function ProjectPortal({
                 </Box>
               ) : null}
 
-              <Box
-                display="grid"
-                gridTemplateColumns={{ base: "1fr", md: "1fr 280px" }}
-                gap={{ base: 4, md: 6 }}
-                alignItems="start"
-              >
-                <Stack gap={4}>
-                  {/* About Section */}
-                  <Section title="About">
-                    {project.description?.trim() ? (
-                      <Text>{project.description.trim()}</Text>
+              <Stack gap={1}>
+                {/* About Section */}
+                <Section
+                  title="About"
+                  mt={3}
+                  borderLeft="3px solid"
+                  borderColor="var(--color-accent)"
+                  pl={4}
+                >
+                  {project.description?.trim() ? (
+                    <Text>{project.description.trim()}</Text>
+                  ) : (
+                    <Muted>No description provided.</Muted>
+                  )}
+                </Section>
+                {/* Tech Section */}
+                <Section
+                  title="Tech"
+                  mt={3}
+                  borderLeft="3px solid"
+                  borderColor="var(--color-accent)"
+                  pl={4}
+                >
+                  {(() => {
+                    const techClean = Array.isArray(project.tech)
+                      ? project.tech.filter((t) => t && t.trim().length > 0)
+                      : [];
+
+                    return techClean.length > 0 ? (
+                      <Text>{techClean.join(" • ")}</Text>
                     ) : (
-                      <Muted>No description provided.</Muted>
-                    )}
-                  </Section>
-                  {/* Tech Section */}
-                  <Section title="Tech">
-                    {project.tech?.length ? (
-                      <Wrap gap="6px">
-                        {project.tech.map((t, i) => (
+                      <Muted>No tech listed.</Muted>
+                    );
+                  })()}
+                </Section>
+
+                {/* Achivements */}
+                <Section
+                  title="Key Achievements"
+                  mt={3}
+                  borderLeft="3px solid"
+                  borderColor="var(--color-accent)"
+                  pl={4}
+                >
+                  {project.achievements?.length ? (
+                    <Stack as="ul" gap={2} pl={5} lineHeight="shorter">
+                      {project.achievements.map((a, i) => (
+                        <Box as="li" key={i}>
+                          {a}
+                        </Box>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Muted>No achievements added yet.</Muted>
+                  )}
+                </Section>
+                {/* Links */}
+                <Section
+                  title="Links"
+                  mt={3}
+                  borderLeft="3px solid"
+                  borderColor="var(--color-accent)"
+                  pl={4}
+                >
+                  {project.links?.length ? (
+                    <HStack gap={1}>
+                      {project.links.map((l, i) => {
+                        const label =
+                          l.label?.trim() ||
+                          (() => {
+                            try {
+                              return new URL(l.url).hostname.replace(
+                                /^www\./,
+                                ""
+                              );
+                            } catch {
+                              return l.url;
+                            }
+                          })();
+
+                        return (
                           <Tag.Root
-                            key={`${t}-${i}`}
-                            variant="subtle"
-                            border="1px solid"
-                            borderColor="border"
-                            borderRadius="0"
-                            px={2}
-                            py={1}
+                            key={`${l.url}-${i}`}
+                            asChild
+                            borderRadius="0px"
+                            _hover={{
+                              bg: "var(--color-accent)",
+                              color: "var(--color-seashell)",
+                            }}
+                            height="30px"
+                            p={"2"}
                           >
-                            <Tag.Label fontSize="sm" letterSpacing="wide">
-                              {t}
+                            <Tag.Label>
+                              <Link
+                                href={l.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <VisuallyHidden>Open </VisuallyHidden>
+                                {label}
+                                <HiOutlineExternalLink />
+                              </Link>
                             </Tag.Label>
                           </Tag.Root>
-                        ))}
-                      </Wrap>
-                    ) : (
-                      <Muted>No technologies listed.</Muted>
-                    )}
-                  </Section>
-                  {/* Achivements */}
-                  <Section title="Key Achievements">
-                    {project.achievements?.length ? (
-                      <Stack as="ul" gap={2} pl={5} lineHeight="shorter">
-                        {project.achievements.map((a, i) => (
-                          <Box as="li" key={i}>
-                            {a}
-                          </Box>
-                        ))}
-                      </Stack>
-                    ) : (
-                      <Muted>No achievements added yet.</Muted>
-                    )}
-                  </Section>
-                  {/* Links */}
-                  <Section title="Links">
-                    {project.links?.length ? (
-                      <HStack gap={2}>
-                        {project.links.map((l, i) => {
-                          const label =
-                            l.label?.trim() ||
-                            (() => {
-                              try {
-                                return new URL(l.url).hostname.replace(
-                                  /^www\./,
-                                  ""
-                                );
-                              } catch {
-                                return l.url;
-                              }
-                            })();
-
-                          return (
-                            <Tag.Root
-                              key={`${l.url}-${i}`}
-                              asChild
-                              borderRadius="2px"
-                              _hover={{
-                                bg: "var(--color-accent)",
-                                color: "var(--color-seashell)",
-                              }}
-                              height="36px"
-                              p={"2"}
-                            >
-                              <Tag.Label>
-                                <Link
-                                  href={l.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <VisuallyHidden>Open </VisuallyHidden>
-                                  {label}
-                                </Link>
-                              </Tag.Label>
-                              <Tag.EndElement>
-                                <HiOutlineExternalLink />
-                              </Tag.EndElement>
-                            </Tag.Root>
-                          );
-                        })}
-                      </HStack>
-                    ) : (
-                      <Muted>No external links.</Muted>
-                    )}
-                  </Section>
-                </Stack>
-              </Box>
+                        );
+                      })}
+                    </HStack>
+                  ) : (
+                    <Muted>No external links.</Muted>
+                  )}
+                </Section>
+              </Stack>
             </Drawer.Body>
-
-            <Drawer.Footer
-              borderBottom="1px solid"
-              borderColor={"var(--color-accent)"}
-              px={{ base: 3, md: 5 }}
-              py={{ base: 2, md: 3 }}
-            />
           </Drawer.Content>
         </Drawer.Positioner>
       </Portal>

@@ -24,9 +24,8 @@ export default async function ResumePage() {
   if (!defaultResume || "error" in defaultResume) {
     throw new Error(defaultResume?.error ?? "No default resume found.");
   }
-  
+
   return (
-    
     <Box
       as="article"
       maxW="10xl"

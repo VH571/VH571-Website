@@ -37,8 +37,8 @@ export default async function Admin() {
         padding={"20px"}
         justify={"center"}
         maxW={"1900px"}
+        maxH={"919px"}
         minW={"350px"}
-        fitted
       >
         <Tabs.List>
           <Tabs.Trigger value="resumes" fontWeight={"bold"} fontSize="2rem">

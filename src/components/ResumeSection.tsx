@@ -56,8 +56,10 @@ type Props = {
   certifications?: Certification[];
   awards?: Award[];
 };
+export type SectionMode = "view" | "create" | "edit";
+export type SectionProps = {}
 
-export function EducationSection({ education }: Props) {
+export function EducationSection({ education }: { education: Education[] } & ) {
   if (!education?.length) return null;
   return (
     <Box
@@ -78,7 +80,7 @@ export function EducationSection({ education }: Props) {
             borderColor="var(--color-accent)"
             pl={4}
           >
-            <Text fontSize="lg" fontWeight="bold" letterSpacing="1px">
+            <Text fontSize="lg" fontWeight="bold">
               {item.institution}
             </Text>
 

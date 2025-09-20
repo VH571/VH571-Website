@@ -48,7 +48,7 @@ const ProjectSchema = new Schema<Project>(
     links: [LinkSchema],
     screenshots: [ImageURLSchema],
   },
-  { timestamps: true, validateBeforeSave: true, strict: "throw"}
+  { timestamps: true, validateBeforeSave: true, strict: "throw" }
 );
 
 export const ProjectModel: Model<Project> =

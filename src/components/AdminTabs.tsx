@@ -10,11 +10,12 @@ import SearchBar, {
 } from "./SearchBar";
 import ResumePortal from "./ResumeDrawer";
 import ProjectPortal from "./ProjectDrawer";
-
+import PaginationItems from "./PaginationItem";
 export function ResumeTab({ resumeList }: { resumeList: Resume[] }) {
   const [q, setQ] = useState("");
   const dq = useDebounced(q, 250);
   const containerRef = useRef<HTMLElement>(null!);
+  const drawerBodyRef = useRef<HTMLDivElement>(null!);
   const filtered = useMemo(
     () => filterResumes(resumeList, dq),
     [resumeList, dq]
@@ -32,9 +33,15 @@ export function ResumeTab({ resumeList }: { resumeList: Resume[] }) {
         <Text fontSize="sm">
           Showing {filtered.length} of {resumeList.length}
         </Text>
-        <VStack align="stretch" gap={2} mt={3}>
+        <PaginationItems pageSize={9} itemsProps={{ minH: "700px" }}>
           {filtered.map((r) => (
-            <Box key={r._id} p={3} borderWidth="1px" borderRadius="md">
+            <Box
+              key={r._id}
+              p={3}
+              my={"7px"}
+              borderWidth="1px"
+              borderRadius="md"
+            >
               <HStack>
                 <VStack gap={"none"} align={"start"}>
                   <Text fontWeight="semibold">{r.name}</Text>
@@ -49,13 +56,17 @@ export function ResumeTab({ resumeList }: { resumeList: Resume[] }) {
                         Open Resume
                       </Button>
                     </Drawer.Trigger>
-                    <ResumePortal resume={r} containerRef={containerRef} />
+                    <ResumePortal
+                      resume={r}
+                      containerRef={containerRef}
+                      bodyRef={drawerBodyRef}
+                    />
                   </Drawer.Root>
                 </Box>
               </HStack>
             </Box>
           ))}
-        </VStack>
+        </PaginationItems>
       </Box>
     </Box>
   );
@@ -84,9 +95,15 @@ export function ProjectTab({ projectList }: { projectList: Project[] }) {
           Showing {filtered.length} of {projectList.length}
         </Text>
 
-        <VStack align="stretch" gap={2} mt={3}>
+        <PaginationItems pageSize={9} itemsProps={{ minH: "700px" }}>
           {filtered.map((p) => (
-            <Box key={p._id} p={3} borderWidth="1px" borderRadius="md">
+            <Box
+              key={p._id}
+              p={3}
+              my={"7px"}
+              borderWidth="1px"
+              borderRadius="md"
+            >
               <HStack>
                 <VStack gap="none" align="start">
                   <Text fontWeight="semibold">{p.name}</Text>
@@ -119,7 +136,7 @@ export function ProjectTab({ projectList }: { projectList: Project[] }) {
               </HStack>
             </Box>
           ))}
-        </VStack>
+        </PaginationItems>
       </Box>
     </Box>
   );
