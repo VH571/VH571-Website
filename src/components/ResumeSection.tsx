@@ -1,4 +1,19 @@
-import { Box, Text, VStack, Link, List, ListItem } from "@chakra-ui/react";
+"use client";
+import {
+  Box,
+  Text,
+  VStack,
+  Link,
+  List,
+  ListItem,
+  HStack,
+  IconButton,
+  Input,
+  SimpleGrid,
+  Field,
+  Editable,
+  Checkbox,
+} from "@chakra-ui/react";
 import {
   Education,
   Extracurricular,
@@ -8,8 +23,9 @@ import {
   Certification,
   Award,
 } from "@/models/resume";
-
+import { IoMdTrash } from "react-icons/io";
 import { Section, SectionMode } from "./Section";
+import { InlineEditableText } from "./InLineEditable";
 
 const fmtMY = (s?: string) => {
   if (!s) return undefined;
@@ -24,7 +40,7 @@ type SectionHeaderProps = {
   jp: string;
   en: string;
 };
-
+const monthOrEmpty = (v?: string) => (/^\d{4}-\d{2}$/.test(v ?? "") ? v! : "");
 export function SectionHeader({ jp, en }: SectionHeaderProps) {
   return (
     <Box
@@ -92,10 +108,139 @@ export function EducationSection({
       onCancel={onCancel}
       onChangeMode={onChangeMode}
       renderViewItem={(item, index) => (
-        <Box key={index}>You are viewing the education section</Box>
+        <Box
+          key={index}
+          w="100%"
+          borderLeft="3px solid"
+          borderColor="var(--color-accent)"
+          pl={4}
+        >
+          <Text fontSize="lg" fontWeight="bold">
+            {item.institution}
+          </Text>
+
+          <Text
+            fontSize="md"
+            fontWeight="semibold"
+            color={"var(--color-accent-alt)"}
+          >
+            {item.degree}
+            {item.fieldOfStudy ? ` in ${item.fieldOfStudy}` : ""}
+          </Text>
+
+          <Text fontSize="sm" fontWeight="bold">
+            {[
+              [
+                fmtMY(item.startDate),
+                item.endDate ? fmtMY(item.endDate) : "Present",
+              ]
+                .filter(Boolean)
+                .join(" – "),
+              item.location,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+        </Box>
       )}
       renderEditItem={(item, index, update, remove) => (
-        <Box key={index}>this is the edit section</Box>
+        <Box
+          key={index}
+          w="100%"
+          borderLeft="3px solid"
+          borderColor="var(--color-accent)"
+          pl={4}
+          pb={3}
+          position={"relative"}
+        >
+          <HStack justify="space-between" align="start">
+            <Field.Root required>
+              <Field.Label>
+                Institution <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                value={item.institution ?? ""}
+                placeholder="Institution"
+                onChange={(e) => update(index, { institution: e.target.value })}
+              />
+            </Field.Root>
+
+            <IconButton
+              position={"absolute"}
+              aria-label="Remove education"
+              variant="ghost"
+              size="sm"
+              onClick={() => remove(index)}
+              top={-3}
+              right={0}
+            >
+              <IoMdTrash />
+            </IconButton>
+          </HStack>
+
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={3} mt={2}>
+            <Field.Root required>
+              <Field.Label>
+                Degree <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                value={item.degree ?? ""}
+                placeholder="Degree (e.g., B.S.)"
+                onChange={(e) => update(index, { degree: e.target.value })}
+              />
+            </Field.Root>
+
+            <Field.Root required>
+              <Field.Label>
+                Field of Study <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                value={item.fieldOfStudy ?? ""}
+                placeholder="Field of study"
+                onChange={(e) =>
+                  update(index, { fieldOfStudy: e.target.value })
+                }
+              />
+            </Field.Root>
+
+            <SimpleGrid
+              columns={{ base: 1, md: 3 }}
+              gap={3}
+              gridColumn="1 / -1"
+            >
+              <Field.Root required>
+                <Field.Label>
+                  Start Date <Field.RequiredIndicator />
+                </Field.Label>
+                <Input
+                  type="month"
+                  value={monthOrEmpty(item.startDate)}
+                  onChange={(e) => update(index, { startDate: e.target.value })}
+                />
+                <Field.HelperText>Format: YYYY-MM</Field.HelperText>
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>End Date</Field.Label>
+                <Input
+                  type="month"
+                  value={monthOrEmpty(item.endDate)}
+                  onChange={(e) => update(index, { endDate: e.target.value })}
+                />
+                <Field.HelperText>End date (empty = Present)</Field.HelperText>
+              </Field.Root>
+
+              <Field.Root>
+                <Field.Label>Location</Field.Label>
+                <Input
+                  value={item.location ?? ""}
+                  placeholder="Location"
+                  onChange={(e) => update(index, { location: e.target.value })}
+                />
+              </Field.Root>
+            </SimpleGrid>
+          </SimpleGrid>
+        </Box>
       )}
       canEdit={canEdit}
     />

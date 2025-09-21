@@ -87,7 +87,7 @@ export default function ResumePortal({
             overflow="auto"
             bg="bg"
           >
-            <Box minW={{ md: "404px", lg: "920px" }} maxW={"920px"} mx="auto">
+            <Box minW={{ md: "404px", lg: "404px" }} maxW={"920px"} mx="auto">
               <Drawer.Header
                 as="header"
                 top={0}

@@ -119,7 +119,11 @@ export default async function ResumePage() {
         </VStack>
       </Box>
 
-      <EducationSection education={defaultResume.education ?? []} />
+      <EducationSection
+        mode="view"
+        education={defaultResume.education ?? []}
+        canEdit={false}
+      />
       <ExperienceSection experience={defaultResume.experience ?? []} />
       <ExtracurricularSection
         extracurricular={defaultResume.extracurriculars ?? []}
