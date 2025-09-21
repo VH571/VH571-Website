@@ -12,9 +12,10 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import * as React from "react";
+import { useState } from "react";
 import type { Resume } from "@/models/resume";
 import { Link as ExtLink } from "@/models/project";
-
+import { SectionMode } from "@/components/Section";
 import {
   EducationSection,
   ExperienceSection,
@@ -24,7 +25,7 @@ import {
   CertificationsSection,
   AwardsSection,
 } from "./ResumeSection";
-
+import { Education } from "@/models/resume";
 function formatLabelFromUrl(url: string) {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -59,14 +60,17 @@ export default function ResumePortal({
   containerRef?: React.RefObject<HTMLElement> | null;
   bodyRef: React.RefObject<HTMLDivElement>;
 }) {
-  if (!containerRef) return null;
+  const [mode, setMode] = useState<SectionMode>("view");
+  const [education, setEducation] = useState<Education[]>(
+    resume.education ?? []
+  );
 
+  if (!containerRef) return null;
   const contactLinks: ExtLink[] = [
     resume.githubUrl ? { url: resume.githubUrl, label: "GitHub" } : null,
     resume.linkedinUrl ? { url: resume.linkedinUrl, label: "LinkedIn" } : null,
     resume.website ? { url: resume.website, label: "Website" } : null,
   ].filter(Boolean) as ExtLink[];
-
   return (
     <Box>
       <Portal container={containerRef ?? ""}>
@@ -187,7 +191,18 @@ export default function ResumePortal({
               {/* Body */}
               <Drawer.Body px={{ base: 3, md: 5 }} py={{ base: 3, md: 4 }}>
                 <Stack gap={0}>
-                  <EducationSection education={resume.education} />
+                  <EducationSection
+                    mode={mode}
+                    education={education}
+                    onChangeMode={setMode}
+                    onCancel={() => {
+                      // no-op; Section resets draft for us
+                    }}
+                    onSave={(next) => {
+                      setEducation(next); // persist to state (or call your API here)
+                    }}
+                    canEdit
+                  />
                   <ExperienceSection experience={resume.experience} />
                   <SkillsSection technicalSkills={resume.technicalSkills} />
                   <ExtracurricularSection
@@ -197,7 +212,7 @@ export default function ResumePortal({
                   <CertificationsSection
                     certifications={resume.certifications}
                   />
-                  <AwardsSection awards={resume.awards as any} />
+                  <AwardsSection awards={resume.awards} />
                 </Stack>
               </Drawer.Body>
             </Box>

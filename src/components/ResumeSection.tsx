@@ -9,6 +9,8 @@ import {
   Award,
 } from "@/models/resume";
 
+import { Section, SectionMode } from "./Section";
+
 const fmtMY = (s?: string) => {
   if (!s) return undefined;
   const d = new Date(s);
@@ -56,59 +58,47 @@ type Props = {
   certifications?: Certification[];
   awards?: Award[];
 };
-export type SectionMode = "view" | "create" | "edit";
-export type SectionProps = {}
 
-export function EducationSection({ education }: { education: Education[] } & ) {
-  if (!education?.length) return null;
+export function EducationSection({
+  mode,
+  education,
+  onSave,
+  onCancel,
+  onChangeMode,
+  canEdit,
+}: {
+  mode: SectionMode;
+  education: Education[];
+  onSave?: (next: Education[]) => void | Promise<void>;
+  onCancel?: () => void;
+  onChangeMode?: (m: SectionMode) => void;
+  canEdit?: boolean;
+}) {
   return (
-    <Box
-      as="section"
-      mb={10}
-      display="inline-block"
-      w="100%"
-      //verticalAlign="top"
-    >
-      <SectionHeader jp="エジュケーション" en="Education" />
-
-      <VStack align="start" gap={2}>
-        {education?.map((item, index) => (
-          <Box
-            key={index}
-            w="100%"
-            borderLeft="3px solid"
-            borderColor="var(--color-accent)"
-            pl={4}
-          >
-            <Text fontSize="lg" fontWeight="bold">
-              {item.institution}
-            </Text>
-
-            <Text
-              fontSize="md"
-              fontWeight="semibold"
-              color={"var(--color-accent-alt)"}
-            >
-              {item.degree} {item.fieldOfStudy ? `in ${item.fieldOfStudy}` : ""}
-            </Text>
-
-            <Text fontSize="sm" fontWeight="bold">
-              {[
-                [
-                  fmtMY(item.startDate),
-                  item.endDate ? fmtMY(item.endDate) : "Present",
-                ]
-                  .filter(Boolean)
-                  .join(" – "),
-                item.location,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </Text>
-          </Box>
-        ))}
-      </VStack>
-    </Box>
+    <Section<Education>
+      mode={mode}
+      title={<SectionHeader jp="エジュケーション" en="Education" />}
+      data={education}
+      canAdd
+      emptyItem={() => ({
+        institution: "",
+        degree: "",
+        fieldOfStudy: "",
+        startDate: "",
+        endDate: "",
+        location: "",
+      })}
+      onSave={onSave}
+      onCancel={onCancel}
+      onChangeMode={onChangeMode}
+      renderViewItem={(item, index) => (
+        <Box key={index}>You are viewing the education section</Box>
+      )}
+      renderEditItem={(item, index, update, remove) => (
+        <Box key={index}>this is the edit section</Box>
+      )}
+      canEdit={canEdit}
+    />
   );
 }
 
