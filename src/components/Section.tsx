@@ -23,7 +23,7 @@ import {
 } from "react-icons/md";
 export type SectionMode = "view" | "edit" | "create";
 
-type SectionProps<T> = {
+export type SectionProps<T> = {
   mode: SectionMode; // "view" | "edit" | "create"
   title?: ReactNode; // header node (can be your SectionHeader)
   data: T[]; // incoming items
@@ -99,7 +99,7 @@ export function Section<T>({
   const isDesktop = useBreakpointValue<true | false>({ base: false, lg: true });
 
   return (
-    <Box as="section" mb={10} display="inline-block" w="100%">
+    <Box as="section" display="inline-block" w="100%">
       <Box position="relative" mb={3}>
         <Box w="100%">{title}</Box>
         <Show

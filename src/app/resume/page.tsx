@@ -1,7 +1,16 @@
-import { Box, HStack, VStack, Text, Image, Link } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  VStack,
+  Text,
+  Image,
+  Link,
+  Separator,
+} from "@chakra-ui/react";
 import { Resume } from "@/models/resume";
 import { getDefaultResume } from "@/lib/resumeService";
 import {
+  HeaderSection, 
   EducationSection,
   ExtracurricularSection,
   ExperienceSection,
@@ -29,16 +38,16 @@ export default async function ResumePage() {
     <Box
       as="article"
       maxW="10xl"
-      height={"100vh"}
+      height={{ base: "none", md: "100%" }}
       mx="auto"
       p={6}
       overflowX="auto"
       overflowY="auto"
-      columnFill={"balance"}
+      columnFill={{ base: "balance", md: "auto" }}
       columnGap={"1.5rem"}
       columnWidth={"20rem"}
     >
-      <Box as="section" mb={10} w="100%" textAlign="center">
+      <Box as="section" mb={10} w="100%" textAlign="center" h={"100%"}>
         <VStack gap={2} align="center">
           <Image
             src={defaultResume.headshot?.url}
@@ -121,17 +130,45 @@ export default async function ResumePage() {
 
       <EducationSection
         mode="view"
-        education={defaultResume.education ?? []}
         canEdit={false}
+        education={defaultResume.education ?? []}
       />
-      <ExperienceSection experience={defaultResume.experience ?? []} />
+      <Separator orientation="horizontal" height="3" border={"none"} />
+      <ExperienceSection
+        mode="view"
+        canEdit={false}
+        experience={defaultResume.experience ?? []}
+      />
+      <Separator orientation="horizontal" height="3" border={"none"} />
       <ExtracurricularSection
+        mode="view"
+        canEdit={false}
         extracurricular={defaultResume.extracurriculars ?? []}
       />
-      <SkillsSection technicalSkills={defaultResume.technicalSkills} />
-      <VolunteerSection volunteerWork={defaultResume.volunteerWork} />
-      <CertificationsSection certifications={defaultResume.certifications} />
-      <AwardsSection awards={defaultResume.awards} />
+      <Separator orientation="horizontal" height="3" border={"none"} />
+      <SkillsSection
+        mode="view"
+        canEdit={false}
+        technicalSkills={defaultResume.technicalSkills}
+      />
+      <Separator orientation="horizontal" height="3" border={"none"} />
+      <VolunteerSection
+        mode="view"
+        canEdit={false}
+        volunteerWork={defaultResume.volunteerWork ?? []}
+      />
+      <Separator orientation="horizontal" height="3" border={"none"} />
+      <CertificationsSection
+        mode="view"
+        canEdit={false}
+        certifications={defaultResume.certifications ?? []}
+      />
+      <Separator orientation="horizontal" height="3" border={"none"} />
+      <AwardsSection
+        mode="view"
+        canEdit={false}
+        awards={defaultResume.awards ?? []}
+      />
     </Box>
   );
 }

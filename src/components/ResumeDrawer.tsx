@@ -1,5 +1,9 @@
 "use client";
-
+import * as React from "react";
+import { useState } from "react";
+import { Link as ExtLink } from "@/models/project";
+import { SectionMode } from "@/components/Section";
+import { InlineLink } from "./Utilities";
 import {
   Box,
   Drawer,
@@ -13,8 +17,16 @@ import {
   Image,
   VStack,
 } from "@chakra-ui/react";
-import * as React from "react";
-import { useState } from "react";
+import {
+  HeaderSection,
+  EducationSection,
+  ExperienceSection,
+  ExtracurricularSection,
+  SkillsSection,
+  VolunteerSection,
+  CertificationsSection,
+  AwardsSection,
+} from "./ResumeSection";
 import {
   Education,
   Extracurricular,
@@ -25,42 +37,9 @@ import {
   Award,
   Resume,
 } from "@/models/resume";
-import { Link as ExtLink } from "@/models/project";
-import { SectionMode } from "@/components/Section";
-import {
-  EducationSection,
-  ExperienceSection,
-  ExtracurricularSection,
-  SkillsSection,
-  VolunteerSection,
-  CertificationsSection,
-  AwardsSection,
-} from "./ResumeSection";
-function formatLabelFromUrl(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
 
-function InlineLink({ link }: { link: ExtLink }) {
-  const label = link.label?.trim() || formatLabelFromUrl(link.url);
-  return (
-    <Link
-      href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      textDecoration="underline"
-      color={"var(--color-accent)"}
-      fontSize="sm"
-      mr={3}
-    >
-      {label}
-    </Link>
-  );
-}
 type SectionKey =
+  | "header"
   | "education"
   | "experience"
   | "skills"
@@ -71,6 +50,7 @@ type SectionKey =
 
 function useSectionModes(initial?: Partial<Record<SectionKey, SectionMode>>) {
   const [modes, setModes] = React.useState<Record<SectionKey, SectionMode>>({
+    header: "view",
     education: "view",
     experience: "view",
     skills: "view",
@@ -86,6 +66,7 @@ function useSectionModes(initial?: Partial<Record<SectionKey, SectionMode>>) {
 
   const setAll = (mode: SectionMode) =>
     setModes({
+      header: mode,
       education: mode,
       experience: mode,
       skills: mode,
@@ -97,7 +78,16 @@ function useSectionModes(initial?: Partial<Record<SectionKey, SectionMode>>) {
 
   return { modes, setMode, setAll };
 }
-
+export type HeaderData = {
+  name: string;
+  title?: string;
+  email: string;
+  headshot?: { url: string; alt?: string } | null;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  website?: string;
+  summary?: string;
+};
 export default function ResumePortal({
   resume,
   containerRef,
@@ -108,18 +98,43 @@ export default function ResumePortal({
   bodyRef: React.RefObject<HTMLDivElement>;
 }) {
   const { modes, setMode } = useSectionModes();
+  const initialHeader: HeaderData = {
+    name: resume.name ?? "",
+    title: resume.title ?? undefined,
+    email: resume.email ?? "",
+    headshot: resume.headshot ?? null,
+    githubUrl: resume.githubUrl ?? undefined,
+    linkedinUrl: resume.linkedinUrl ?? undefined,
+    website: resume.website ?? undefined,
+    summary: resume.summary ?? undefined,
+  };
+
+  const [header, setHeader] = useState<HeaderData>(initialHeader);
 
   const [education, setEducation] = useState<Education[]>(
     resume.education ?? []
   );
+
   const [experience, setExperience] = useState<Experience[]>(
     resume.experience ?? []
   );
+
   const [extracurricular, setExtracurricular] = useState<Extracurricular[]>(
-    resume.experience ?? []
+    resume.extracurriculars ?? []
   );
+
   const [technicalSkills, setTechnicalSkills] =
     useState<TechnicalSkills | null>(resume.technicalSkills ?? null);
+
+  const [volunteerWork, setVolunteerWork] = useState<VolunteerWork[]>(
+    resume.volunteerWork ?? []
+  );
+
+  const [certifications, setCertifications] = useState<Certification[]>(
+    resume.certifications ?? []
+  );
+
+  const [awards, setAwards] = useState<Award[]>(resume.awards ?? []);
 
   if (!containerRef) return null;
   const contactLinks: ExtLink[] = [
@@ -144,109 +159,26 @@ export default function ResumePortal({
             overflow="auto"
             bg="bg"
           >
-            <Box minW={{ md: "404px", lg: "404px" }} maxW={"920px"} mx="auto">
+            <Box w="full" maxW={"920px"} mx="auto">
               <Drawer.Header
                 as="header"
                 top={0}
-                zIndex={1}
                 px={{ base: 3, md: 5 }}
-                py={{ base: 3, md: 5 }}
                 borderBottom="1px solid"
                 borderColor="blackAlpha.200"
               >
-                <VStack alignItems="left" w={"100%"}>
-                  <Box
-                    display="grid"
-                    gridTemplateColumns={{ base: "1fr", md: "auto 1fr" }}
-                    columnGap={6}
-                    rowGap={3}
-                    pr={{ md: 8 }}
-                    position="relative"
-                  >
-                    <HStack align="center" gap={4} minW={0}>
-                      {resume.headshot?.url ? (
-                        <Image
-                          src={resume.headshot.url}
-                          alt={resume.headshot.alt ?? `${resume.name} headshot`}
-                          boxSize="64px"
-                          objectFit="cover"
-                          borderRadius="full"
-                        />
-                      ) : null}
-                      <Box minW={0} css={{ overflowWrap: "anywhere" }}>
-                        <Heading
-                          id="resume-title"
-                          as="h2"
-                          size="md"
-                          lineHeight="short"
-                          letterSpacing="wide"
-                        >
-                          {resume.name}
-                        </Heading>
-                        <Text fontSize="sm" color="fg.muted">
-                          {resume.title}
-                        </Text>
-                        {/* Email */}
-                        <Text mt={1}>
-                          <Text as="span" fontWeight="bold">
-                            Email:
-                          </Text>{" "}
-                          <Link
-                            href={`mailto:${resume.email}`}
-                            textDecoration={"none"}
-                          >
-                            {resume.email}
-                          </Link>
-                        </Text>
-                        {/* External links */}
-                        <HStack mt={2} gap={2} flexWrap="wrap">
-                          {contactLinks.length ? (
-                            contactLinks.map((l, i) => (
-                              <InlineLink link={l} key={`${l.url}-${i}`} />
-                            ))
-                          ) : (
-                            <Text color="fg.muted" fontSize="sm">
-                              No external links.
-                            </Text>
-                          )}
-                        </HStack>
-                      </Box>
-                    </HStack>
-
-                    {/* Close button */}
-                    <Drawer.CloseTrigger asChild>
-                      <CloseButton
-                        position="absolute"
-                        top="0"
-                        right="0"
-                        size="sm"
-                        borderRadius="0"
-                        _focusVisible={{
-                          boxShadow: "0 0 0 2px var(--color-accent)",
-                        }}
-                      />
-                    </Drawer.CloseTrigger>
-                  </Box>
-
-                  <Box
-                    mt={3}
-                    borderLeft="3px solid"
-                    borderColor="var(--color-accent)"
-                    pl={4}
-                  >
-                    {resume.summary?.trim() ? (
-                      <Text lineHeight="tall">{resume.summary.trim()}</Text>
-                    ) : (
-                      <Text color="fg.muted" fontStyle="italic">
-                        No summary provided.
-                      </Text>
-                    )}
-                  </Box>
-                </VStack>
+                <HeaderSection
+                  mode={modes.header}
+                  onChangeMode={setMode("header")}
+                  header={header}
+                  onSave={(next) => setHeader(next[0] ?? initialHeader)}
+                  onCancel={() => setMode("header")("view")}
+                  canEdit
+                />
               </Drawer.Header>
 
               <Drawer.Body px={{ base: 3, md: 5 }} py={{ base: 3, md: 4 }}>
-                <Stack gap={0}>
+                <Stack gap={10}>
                   <EducationSection
                     mode={modes.education}
                     onChangeMode={setMode("education")}
@@ -281,6 +213,7 @@ export default function ResumePortal({
                     onCancel={() => setMode("skills")("view")}
                     canEdit
                   />
+
                   <ExtracurricularSection
                     mode={modes.extracurricular}
                     onChangeMode={setMode("extracurricular")}
@@ -291,11 +224,35 @@ export default function ResumePortal({
                     onCancel={() => setMode("extracurricular")("view")}
                     canEdit
                   />
-                  <VolunteerSection volunteerWork={resume.volunteerWork} />
-                  <CertificationsSection
-                    certifications={resume.certifications}
+
+                  <VolunteerSection
+                    mode={modes.volunteer}
+                    onChangeMode={setMode("volunteer")}
+                    volunteerWork={volunteerWork}
+                    onSave={(next) => {
+                      setVolunteerWork(next);
+                    }}
+                    onCancel={() => setMode("volunteer")("view")}
+                    canEdit
                   />
-                  <AwardsSection awards={resume.awards} />
+
+                  <CertificationsSection
+                    mode={modes.certifications}
+                    onChangeMode={setMode("certifications")}
+                    certifications={certifications}
+                    onSave={(next) => setCertifications(next)}
+                    onCancel={() => setMode("certifications")("view")}
+                    canEdit
+                  />
+
+                  <AwardsSection
+                    mode={modes.awards}
+                    onChangeMode={setMode("awards")}
+                    awards={awards}
+                    onSave={(next) => setAwards(next)}
+                    onCancel={() => setMode("awards")("view")}
+                    canEdit
+                  />
                 </Stack>
               </Drawer.Body>
             </Box>
