@@ -11,10 +11,10 @@ import { Water } from "three/addons/objects/Water.js";
 import { Sky } from "three/addons/objects/Sky.js";
 
 type Props = {
-  height?: number | string; // default: "100vh"
+  height?: number | string;
 };
 
-export default function OceanViewer({ height = "100vh" }: Props) {
+export default function OceanViewer({ height = "100%" }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -122,12 +122,8 @@ export default function OceanViewer({ height = "100vh" }: Props) {
     // --- GUI ---
     const gui = new GUI();
     const folderSky = gui.addFolder("Sky");
-    folderSky
-      .add(parameters, "elevation", 0, 90, 0.1)
-      .onChange(updateSun);
-    folderSky
-      .add(parameters, "azimuth", -180, 180, 0.1)
-      .onChange(updateSun);
+    folderSky.add(parameters, "elevation", 0, 90, 0.1).onChange(updateSun);
+    folderSky.add(parameters, "azimuth", -180, 180, 0.1).onChange(updateSun);
     folderSky.open();
 
     const waterUniforms = (water.material as THREE.ShaderMaterial).uniforms;
@@ -135,9 +131,7 @@ export default function OceanViewer({ height = "100vh" }: Props) {
     folderWater
       .add(waterUniforms.distortionScale, "value", 0, 8, 0.1)
       .name("distortionScale");
-    folderWater
-      .add(waterUniforms.size, "value", 0.1, 10, 0.1)
-      .name("size");
+    folderWater.add(waterUniforms.size, "value", 0.1, 10, 0.1).name("size");
     folderWater.open();
 
     // --- resize handling ---
@@ -196,7 +190,12 @@ export default function OceanViewer({ height = "100vh" }: Props) {
   return (
     <div
       ref={containerRef}
-      style={{ width: "100%", height, position: "relative", overflow: "hidden" }}
+      style={{
+        width: "100%",
+        height,
+        position: "relative",
+        overflow: "hidden",
+      }}
     />
   );
 }

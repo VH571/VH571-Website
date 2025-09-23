@@ -10,7 +10,7 @@ import {
 import { Resume } from "@/models/resume";
 import { getDefaultResume } from "@/lib/resumeService";
 import {
-  HeaderSection, 
+  HeaderSection,
   EducationSection,
   ExtracurricularSection,
   ExperienceSection,
@@ -41,9 +41,6 @@ export default async function ResumePage() {
       height={{ base: "none", md: "100%" }}
       mx="auto"
       p={6}
-      overflowX="auto"
-      overflowY="auto"
-      columnFill={{ base: "balance", md: "auto" }}
       columnGap={"1.5rem"}
       columnWidth={"20rem"}
     >

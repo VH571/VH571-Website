@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { TagInput } from "./TagInput";
 import { IoMdTrash } from "react-icons/io";
 import { Section, SectionMode } from "./Section";
@@ -19,6 +20,7 @@ import {
   Textarea,
   Heading,
   Image,
+  Checkbox,
 } from "@chakra-ui/react";
 import {
   Education,
@@ -29,17 +31,11 @@ import {
   Certification,
   Award,
 } from "@/models/resume";
+import { ImageUpload, DraftImage } from "./ImageUploader";
+import { uploadImage, deleteImageByUrl } from "@/lib/imageService";
+import React from "react";
+import { HeaderData } from "./ResumeDrawer";
 
-export type HeaderData = {
-  name: string;
-  title?: string;
-  email: string;
-  headshot?: { url: string; alt?: string } | null;
-  githubUrl?: string;
-  linkedinUrl?: string;
-  website?: string;
-  summary?: string;
-};
 
 export function HeaderSection({
   mode,
@@ -56,6 +52,24 @@ export function HeaderSection({
   onChangeMode?: (m: SectionMode) => void;
   canEdit?: boolean;
 }) {
+  const [pending, setPending] = useState<DraftImage | null>(null);
+  const editStartUrlRef = React.useRef<string | null>(null);
+  const [imgError, setImgError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (
+      (mode === "edit" || mode === "create") &&
+      editStartUrlRef.current === null
+    ) {
+      editStartUrlRef.current = header.headshot?.url ?? null;
+    }
+    if (mode === "view") {
+      editStartUrlRef.current = null;
+      setPending(null);
+      setImgError(null);
+    }
+  }, [mode, header.headshot?.url]);
+
   const contacts = [
     header.githubUrl ? { url: header.githubUrl, label: "GitHub" } : null,
     header.linkedinUrl ? { url: header.linkedinUrl, label: "LinkedIn" } : null,
@@ -78,21 +92,54 @@ export function HeaderSection({
         website: "",
         summary: "",
       })}
-      onSave={onSave}
-      onCancel={onCancel}
+      onSave={async (next) => {
+        const curr = next[0] ?? header;
+        const updated: HeaderData = { ...curr };
+
+        try {
+          if (pending) {
+            const oldUrl = editStartUrlRef.current;
+            if (oldUrl) {
+              await deleteImageByUrl(oldUrl);
+            }
+            const img = await uploadImage(pending.file, {
+              alt: pending.alt,
+              width: pending.width || undefined,
+              height: pending.height || undefined,
+            });
+            updated.headshot = img;
+          }
+
+          await onSave?.([updated]);
+
+          setPending(null);
+          setImgError(null);
+          editStartUrlRef.current = null;
+        } catch (e: any) {
+          setImgError(
+            e?.message || "Failed to save headshot. Please try again."
+          );
+          throw e;
+        }
+      }}
+      onCancel={() => {
+        setPending(null);
+        setImgError(null);
+        onCancel?.();
+      }}
       onChangeMode={onChangeMode}
       renderViewItem={(item, index) => (
         <Box key={index}>
           <HStack align="center" gap={4} minW={0}>
-            {item.headshot?.url ? (
+            {item.headshot?.url && (
               <Image
                 src={item.headshot.url}
                 alt={item.headshot.alt ?? `${item.name} headshot`}
-                boxSize="64px"
+                boxSize="7em"
                 objectFit="cover"
                 borderRadius="full"
               />
-            ) : null}
+            )}
             <Box minW={0} css={{ overflowWrap: "anywhere" }}>
               <Heading
                 as="h3"
@@ -101,7 +148,22 @@ export function HeaderSection({
                 letterSpacing="wide"
               >
                 {item.name}
+                {item.isDefault && (
+                  <Text
+                    as="span"
+                    ml={2}
+                    px={2}
+                    py={0.5}
+                    fontSize="xs"
+                    borderRadius="md"
+                    bg="green.50"
+                    color="green.700"
+                  >
+                    Default
+                  </Text>
+                )}
               </Heading>
+
               {item.title ? (
                 <Text fontSize="sm" color="fg.muted">
                   {item.title}
@@ -156,121 +218,157 @@ export function HeaderSection({
           </Box>
         </Box>
       )}
-      renderEditItem={(item, index, update) => (
-        <Box
-          key={index}
-          w="100%"
-          borderLeft="3px solid"
-          borderColor="var(--color-accent)"
-          pl={4}
-          pb={3}
-          position="relative"
-        >
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={3} mt={2}>
-            <Field.Root required>
-              <Field.Label>
-                Name <Field.RequiredIndicator />
-              </Field.Label>
-              <Input
-                value={item.name ?? ""}
-                placeholder="Your name"
-                onChange={(e) => update(0, { name: e.target.value })}
-              />
-            </Field.Root>
-            <Field.Root>
-              <Field.Label>Title</Field.Label>
-              <Input
-                value={item.title ?? ""}
-                placeholder="e.g., Software Engineer"
-                onChange={(e) => update(0, { title: e.target.value })}
-              />
-            </Field.Root>
-            <Field.Root required>
-              <Field.Label>
-                Email <Field.RequiredIndicator />
-              </Field.Label>
-              <Input
-                value={item.email ?? ""}
-                placeholder="you@example.com"
-                onChange={(e) => update(0, { email: e.target.value })}
-              />
-            </Field.Root>
-            <Field.Root>
-              <Field.Label>Headshot URL</Field.Label>
-              <Input
-                value={item.headshot?.url ?? ""}
-                placeholder="https://…/photo.jpg"
-                onChange={(e) =>
-                  update(0, {
-                    headshot: {
-                      url: e.target.value,
-                      alt: item.headshot?.alt ?? "",
-                    },
-                  })
-                }
-              />
-            </Field.Root>
-            <Field.Root>
-              <Field.Label>Headshot Alt</Field.Label>
-              <Input
-                value={item.headshot?.alt ?? ""}
-                placeholder="Headshot alt text"
-                onChange={(e) =>
-                  update(0, {
-                    headshot: {
-                      url: item.headshot?.url ?? "",
-                      alt: e.target.value,
-                    },
-                  })
-                }
-              />
-            </Field.Root>
-            <Box />
-            <SimpleGrid
-              columns={{ base: 1, md: 3 }}
-              gap={3}
-              gridColumn="1 / -1"
-            >
-              <Field.Root>
-                <Field.Label>GitHub URL</Field.Label>
+      renderEditItem={(item, index, update) => {
+        const preview = pending?.previewUrl || item.headshot?.url || "";
+        return (
+          <Box
+            key={index}
+            w="100%"
+            borderLeft="3px solid"
+            borderColor="var(--color-accent)"
+            pl={4}
+            pb={3}
+            position="relative"
+          >
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap={3} mt={2}>
+              <VStack gridColumn="1 / -1" gap={3}>
+                <HStack w="100%" align="center" gap={3}>
+                  <VStack mx="auto">
+                    <Box
+                      w="10em"
+                      h="10em"
+                      overflow="hidden"
+                      borderRadius="full"
+                      borderWidth="1px"
+                      borderColor={imgError ? "red.500" : "border"}
+                    >
+                      {preview ? (
+                        <Image
+                          src={preview}
+                          alt={pending?.alt ?? item.headshot?.alt ?? "Headshot"}
+                          objectFit="cover"
+                          w="100%"
+                          h="100%"
+                        />
+                      ) : null}
+                    </Box>
+
+                    <ImageUpload
+                      maxFiles={1}
+                      onSelected={(drafts) => {
+                        const d = drafts[0];
+                        if (!d) return;
+                        setPending(d);
+                        setImgError(null);
+                      }}
+                    />
+
+                    {imgError && (
+                      <Text fontSize="sm" color="red.500" mt={1}>
+                        {imgError}
+                      </Text>
+                    )}
+
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      Replacing the photo will remove the current one from
+                      storage on Save.
+                    </Text>
+                  </VStack>
+                </HStack>
+                <Checkbox.Root
+                  size="sm"
+                  checked={!!item.isDefault}
+                  onCheckedChange={(d) => update(0, { isDefault: !!d.checked })}
+                  mb={2}
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>Make this my default resume</Checkbox.Label>
+                </Checkbox.Root>
+              </VStack>
+
+              <Field.Root required>
+                <Field.Label>
+                  Name <Field.RequiredIndicator />
+                </Field.Label>
                 <Input
-                  value={item.githubUrl ?? ""}
-                  placeholder="https://github.com/your-handle"
-                  onChange={(e) => update(0, { githubUrl: e.target.value })}
+                  value={item.name ?? ""}
+                  placeholder="Your name"
+                  onChange={(e) => update(0, { name: e.target.value })}
                 />
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>LinkedIn URL</Field.Label>
+                <Field.Label>Title</Field.Label>
                 <Input
-                  value={item.linkedinUrl ?? ""}
-                  placeholder="https://linkedin.com/in/your-handle"
-                  onChange={(e) => update(0, { linkedinUrl: e.target.value })}
+                  value={item.title ?? ""}
+                  placeholder="e.g., Software Engineer"
+                  onChange={(e) => update(0, { title: e.target.value })}
                 />
               </Field.Root>
 
-              <Field.Root>
-                <Field.Label>Website</Field.Label>
+              <Field.Root required>
+                <Field.Label>
+                  Email <Field.RequiredIndicator />
+                </Field.Label>
                 <Input
-                  value={item.website ?? ""}
-                  placeholder="https://your-site.com"
-                  onChange={(e) => update(0, { website: e.target.value })}
+                  value={item.email ?? ""}
+                  placeholder="you@example.com"
+                  onChange={(e) => update(0, { email: e.target.value })}
+                />
+              </Field.Root>
+
+              <Box />
+
+              <SimpleGrid
+                columns={{ base: 1, md: 3 }}
+                gap={3}
+                gridColumn="1 / -1"
+              >
+                <Field.Root>
+                  <Field.Label>GitHub URL</Field.Label>
+                  <Input
+                    value={item.githubUrl ?? ""}
+                    placeholder="https://github.com/your-handle"
+                    onChange={(e) => update(0, { githubUrl: e.target.value })}
+                  />
+                </Field.Root>
+
+                <Field.Root>
+                  <Field.Label>LinkedIn URL</Field.Label>
+                  <Input
+                    value={item.linkedinUrl ?? ""}
+                    placeholder="https://linkedin.com/in/your-handle"
+                    onChange={(e) => update(0, { linkedinUrl: e.target.value })}
+                  />
+                </Field.Root>
+
+                <Field.Root>
+                  <Field.Label>Website</Field.Label>
+                  <Input
+                    value={item.website ?? ""}
+                    placeholder="https://your-site.com"
+                    onChange={(e) => update(0, { website: e.target.value })}
+                  />
+                </Field.Root>
+              </SimpleGrid>
+
+              <Field.Root gridColumn="1 / -1">
+                <Field.Label>Summary</Field.Label>
+                <Textarea
+                  value={item.summary ?? ""}
+                  placeholder="Short professional summary"
+                  onChange={(e) => update(0, { summary: e.target.value })}
+                  h={{ base: "5em", md: "6.5em" }}
+                  resize="vertical"
                 />
               </Field.Root>
             </SimpleGrid>
-            <Field.Root gridColumn="1 / -1">
-              <Field.Label>Summary</Field.Label>
-              <Textarea
-                value={item.summary ?? ""}
-                placeholder="Short professional summary"
-                onChange={(e) => update(0, { summary: e.target.value })}
-                h={{ base: "5em", md: "6.5em" }}
-                resize="vertical"
-              />
-            </Field.Root>
-          </SimpleGrid>
-        </Box>
-      )}
+          </Box>
+        );
+      }}
     />
   );
 }

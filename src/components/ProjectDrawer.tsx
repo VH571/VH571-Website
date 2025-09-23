@@ -71,7 +71,7 @@ export default function ProjectPortal({
             <Drawer.Header
               as="header"
               top={0}
-              zIndex={1}
+             
               px={{ base: 3, md: 5 }}
               py={{ base: 3, md: 5 }}
               borderBottom="1px solid"

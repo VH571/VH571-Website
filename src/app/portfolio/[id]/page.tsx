@@ -16,11 +16,15 @@ import {
 } from "@chakra-ui/react";
 
 type ProjectResult = Project | { error: string };
-type Params = { params: { id: string } };
 
-export default async function PortfolioIDPage({ params }: Params) {
+export default async function PortfolioIDPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   let project: ProjectResult;
-  const { id } = params;
+
+  const { id } = await params;
   try {
     project = await getProjectByID(id);
   } catch (err) {

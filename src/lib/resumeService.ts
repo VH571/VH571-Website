@@ -46,3 +46,49 @@ export async function deleteResumeByID(id: string) {
   });
   return response.json();
 }
+
+export async function patchResumeField(
+  id: string,
+  field: string,
+  value: unknown
+) {
+  const response = await fetch(`${baseUrl}/api/resume/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ field, value }),
+  });
+  return response.json();
+}
+export async function patchResumePath(
+  id: string,
+  path: string,
+  value: unknown
+) {
+  const response = await fetch(`${baseUrl}/api/resume/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, value }),
+  });
+  return response.json();
+}
+
+export async function patchResumePartial(
+  id: string,
+  partial: Record<string, unknown>
+) {
+  const response = await fetch(`${baseUrl}/api/resume/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(partial),
+  });
+  return response.json();
+}
+export async function setResumeDefault(id: string, isDefault: boolean) {
+  const res = await fetch(`${baseUrl}/api/resume/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ isDefault }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}

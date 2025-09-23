@@ -3,7 +3,7 @@ import * as React from "react";
 import { useState } from "react";
 import { Link as ExtLink } from "@/models/project";
 import { SectionMode } from "@/components/Section";
-import { InlineLink } from "./Utilities";
+import { patchResumeField, patchResumePartial } from "@/lib/resumeService";
 import {
   Box,
   Drawer,
@@ -17,6 +17,7 @@ import {
   Image,
   VStack,
 } from "@chakra-ui/react";
+
 import {
   HeaderSection,
   EducationSection,
@@ -37,6 +38,7 @@ import {
   Award,
   Resume,
 } from "@/models/resume";
+import { ImageURL } from "@/models/project";
 
 type SectionKey =
   | "header"
@@ -82,11 +84,12 @@ export type HeaderData = {
   name: string;
   title?: string;
   email: string;
-  headshot?: { url: string; alt?: string } | null;
+  headshot?: ImageURL | null;
   githubUrl?: string;
   linkedinUrl?: string;
   website?: string;
   summary?: string;
+  isDefault?: boolean;
 };
 export default function ResumePortal({
   resume,
@@ -98,6 +101,7 @@ export default function ResumePortal({
   bodyRef: React.RefObject<HTMLDivElement>;
 }) {
   const { modes, setMode } = useSectionModes();
+
   const initialHeader: HeaderData = {
     name: resume.name ?? "",
     title: resume.title ?? undefined,
@@ -107,36 +111,31 @@ export default function ResumePortal({
     linkedinUrl: resume.linkedinUrl ?? undefined,
     website: resume.website ?? undefined,
     summary: resume.summary ?? undefined,
+    isDefault: resume.isDefault ?? false,
   };
 
   const [header, setHeader] = useState<HeaderData>(initialHeader);
-
   const [education, setEducation] = useState<Education[]>(
     resume.education ?? []
   );
-
   const [experience, setExperience] = useState<Experience[]>(
     resume.experience ?? []
   );
-
   const [extracurricular, setExtracurricular] = useState<Extracurricular[]>(
     resume.extracurriculars ?? []
   );
-
   const [technicalSkills, setTechnicalSkills] =
     useState<TechnicalSkills | null>(resume.technicalSkills ?? null);
-
   const [volunteerWork, setVolunteerWork] = useState<VolunteerWork[]>(
     resume.volunteerWork ?? []
   );
-
   const [certifications, setCertifications] = useState<Certification[]>(
     resume.certifications ?? []
   );
-
   const [awards, setAwards] = useState<Award[]>(resume.awards ?? []);
 
   if (!containerRef) return null;
+
   const contactLinks: ExtLink[] = [
     resume.githubUrl ? { url: resume.githubUrl, label: "GitHub" } : null,
     resume.linkedinUrl ? { url: resume.linkedinUrl, label: "LinkedIn" } : null,
@@ -157,12 +156,13 @@ export default function ResumePortal({
             minH="320px"
             maxH="960px"
             overflow="auto"
+            scrollbar={"hidden"}
             bg="bg"
           >
             <Box w="full" maxW={"920px"} mx="auto">
               <Drawer.Header
                 as="header"
-                top={0}
+                marginTop="10px"
                 px={{ base: 3, md: 5 }}
                 borderBottom="1px solid"
                 borderColor="blackAlpha.200"
@@ -171,24 +171,50 @@ export default function ResumePortal({
                   mode={modes.header}
                   onChangeMode={setMode("header")}
                   header={header}
-                  onSave={(next) => setHeader(next[0] ?? initialHeader)}
+                  onSave={async (next) => {
+                    const h = next[0] ?? initialHeader;
+                    const partial: Record<string, any> = {
+                      name: h.name,
+                      title: h.title ?? "",
+                      email: h.email,
+                      githubUrl: h.githubUrl ?? "",
+                      linkedinUrl: h.linkedinUrl ?? "",
+                      website: h.website ?? "",
+                      summary: h.summary ?? "",
+                      headshot: h.headshot ?? null,
+                      isDefault: !!h.isDefault,
+                    };
+
+                    await patchResumePartial(resume._id, partial);
+
+                    setHeader(h);
+                    setMode("header")("view");
+                  }}
                   onCancel={() => setMode("header")("view")}
                   canEdit
                 />
-              </Drawer.Header>
 
+                <Drawer.CloseTrigger
+                  asChild
+                  position="absolute"
+                  top="0"
+                  right="0"
+                >
+                  <CloseButton size="lg" />
+                </Drawer.CloseTrigger>
+              </Drawer.Header>
               <Drawer.Body px={{ base: 3, md: 5 }} py={{ base: 3, md: 4 }}>
                 <Stack gap={10}>
                   <EducationSection
                     mode={modes.education}
                     onChangeMode={setMode("education")}
                     education={education}
-                    onSave={(next) => {
+                    onSave={async (next) => {
                       setEducation(next);
-                    }}
-                    onCancel={() => {
+                      await patchResumeField(resume._id, "education", next);
                       setMode("education")("view");
                     }}
+                    onCancel={() => setMode("education")("view")}
                     canEdit
                   />
 
@@ -196,8 +222,10 @@ export default function ResumePortal({
                     mode={modes.experience}
                     onChangeMode={setMode("experience")}
                     experience={experience}
-                    onSave={(next) => {
+                    onSave={async (next) => {
                       setExperience(next);
+                      await patchResumeField(resume._id, "experience", next);
+                      setMode("experience")("view");
                     }}
                     onCancel={() => setMode("experience")("view")}
                     canEdit
@@ -207,8 +235,15 @@ export default function ResumePortal({
                     mode={modes.skills}
                     onChangeMode={setMode("skills")}
                     technicalSkills={technicalSkills}
-                    onSave={(next) => {
-                      setTechnicalSkills(next[0] ?? null);
+                    onSave={async (next) => {
+                      const one = next[0] ?? null;
+                      setTechnicalSkills(one);
+                      await patchResumeField(
+                        resume._id,
+                        "technicalSkills",
+                        one
+                      );
+                      setMode("skills")("view");
                     }}
                     onCancel={() => setMode("skills")("view")}
                     canEdit
@@ -218,8 +253,14 @@ export default function ResumePortal({
                     mode={modes.extracurricular}
                     onChangeMode={setMode("extracurricular")}
                     extracurricular={extracurricular}
-                    onSave={(next) => {
+                    onSave={async (next) => {
                       setExtracurricular(next);
+                      await patchResumeField(
+                        resume._id,
+                        "extracurriculars",
+                        next
+                      );
+                      setMode("extracurricular")("view");
                     }}
                     onCancel={() => setMode("extracurricular")("view")}
                     canEdit
@@ -229,8 +270,10 @@ export default function ResumePortal({
                     mode={modes.volunteer}
                     onChangeMode={setMode("volunteer")}
                     volunteerWork={volunteerWork}
-                    onSave={(next) => {
+                    onSave={async (next) => {
                       setVolunteerWork(next);
+                      await patchResumeField(resume._id, "volunteerWork", next);
+                      setMode("volunteer")("view");
                     }}
                     onCancel={() => setMode("volunteer")("view")}
                     canEdit
@@ -240,7 +283,15 @@ export default function ResumePortal({
                     mode={modes.certifications}
                     onChangeMode={setMode("certifications")}
                     certifications={certifications}
-                    onSave={(next) => setCertifications(next)}
+                    onSave={async (next) => {
+                      setCertifications(next);
+                      await patchResumeField(
+                        resume._id,
+                        "certifications",
+                        next
+                      );
+                      setMode("certifications")("view");
+                    }}
                     onCancel={() => setMode("certifications")("view")}
                     canEdit
                   />
@@ -249,7 +300,11 @@ export default function ResumePortal({
                     mode={modes.awards}
                     onChangeMode={setMode("awards")}
                     awards={awards}
-                    onSave={(next) => setAwards(next)}
+                    onSave={async (next) => {
+                      setAwards(next);
+                      await patchResumeField(resume._id, "awards", next);
+                      setMode("awards")("view");
+                    }}
                     onCancel={() => setMode("awards")("view")}
                     canEdit
                   />

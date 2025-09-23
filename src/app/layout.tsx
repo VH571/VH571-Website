@@ -18,21 +18,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <Provider >
-          <Flex font={"var(--font-sans)"} h="100dvh" overflow="hidden">
+        <Provider>
+          <Flex font={"var(--font-sans)"} h="100%">
             <Box
               as="aside"
               flex="0 0 auto"
               position="sticky"
               top="0"
-              h="100dvh"
               w="200px"
+              h="100%"
             >
               <Navbar />
             </Box>
-            <Box as="main" flex="1 1 auto" minW="0" h="100dvh" overflowY="auto">
+            <Box as="main" flex="1" h="100%" overflowY="auto">
               {children}
             </Box>
           </Flex>

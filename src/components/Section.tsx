@@ -10,6 +10,8 @@ import {
   Show,
   Menu,
   useBreakpointValue,
+  Drawer,
+  CloseButton,
 } from "@chakra-ui/react";
 import {
   MdOutlineEdit,
@@ -24,14 +26,14 @@ import {
 export type SectionMode = "view" | "edit" | "create";
 
 export type SectionProps<T> = {
-  mode: SectionMode; // "view" | "edit" | "create"
-  title?: ReactNode; // header node (can be your SectionHeader)
-  data: T[]; // incoming items
-  emptyItem?: () => T; // default new item (for create / add)
-  canAdd?: boolean; // show "Add" in edit/create
+  mode: SectionMode;
+  title?: ReactNode;
+  data: T[];
+  emptyItem?: () => T;
+  canAdd?: boolean;
   onSave?: (next: T[]) => void | Promise<void>;
   onCancel?: () => void;
-  onChangeMode?: (m: SectionMode) => void; // optional (e.g., to flip from view->edit)
+  onChangeMode?: (m: SectionMode) => void;
   renderViewItem: (item: T, index: number) => ReactNode;
   renderEditItem: (
     item: T,
@@ -100,104 +102,108 @@ export function Section<T>({
 
   return (
     <Box as="section" display="inline-block" w="100%">
-      <Box position="relative" mb={3}>
+      <Box position="relative" mb={3} zIndex={100}>
         <Box w="100%">{title}</Box>
-        <Show
-          when={isDesktop}
-          fallback={
-            <Box position="absolute" top={0} right={0}>
-              <Menu.Root size="md" variant={"subtle"}>
-                <Menu.Trigger asChild>
-                  <IconButton aria-label="Actions" size="sm" variant="ghost">
-                    <MdOutlineMenu />
-                  </IconButton>
-                </Menu.Trigger>
+        {canEdit && (
+          <Show
+            when={isDesktop}
+            fallback={
+              <Box position="absolute" top={0} right={0}>
+                <Menu.Root size="md" variant={"subtle"}>
+                  <Menu.Trigger asChild>
+                    <IconButton aria-label="Actions" size="sm" variant="ghost">
+                      <MdOutlineMenu />
+                    </IconButton>
+                  </Menu.Trigger>
 
-                <Menu.Positioner>
-                  <Menu.Content bg={"bg"}>
-                    {mode === "view" && canEdit && onChangeMode && (
-                      <Menu.Item value="edit" onSelect={handleEditClick}>
-                        <MdOutlineEdit />
-                        Edit
-                      </Menu.Item>
-                    )}
-
-                    {isMutable && (
-                      <>
-                        <Menu.Item value="save" onSelect={handleSave}>
-                          <MdOutlineSave />
-                          Save
-                        </Menu.Item>
-                        {canAdd && emptyItem && (
-                          <Menu.Item value="add" onSelect={add}>
-                            <MdOutlineAdd />
-                            Add
+                  <Menu.Positioner>
+                    <Menu.Content bg={"bg"}>
+                      {mode === "view" && canEdit && onChangeMode && (
+                        <Box>
+                          <Menu.Item value="edit" onSelect={handleEditClick}>
+                            <MdOutlineEdit />
+                            Edit
                           </Menu.Item>
-                        )}
+                        </Box>
+                      )}
 
-                        <Menu.Separator />
+                      {isMutable && (
+                        <>
+                          <Menu.Item value="save" onSelect={handleSave}>
+                            <MdOutlineSave />
+                            Save
+                          </Menu.Item>
+                          {canAdd && emptyItem && (
+                            <Menu.Item value="add" onSelect={add}>
+                              <MdOutlineAdd />
+                              Add
+                            </Menu.Item>
+                          )}
 
-                        <Menu.Item value="cancel" onSelect={handleCancel}>
-                          <MdOutlineClose />
-                          Cancel
-                        </Menu.Item>
-                      </>
-                    )}
-                  </Menu.Content>
-                </Menu.Positioner>
-              </Menu.Root>
-            </Box>
-          }
-        >
-          <HStack top={0} right={0} position="absolute" gap={2}>
-            {mode === "view" && canEdit && onChangeMode && (
-              <IconButton
-                aria-label="Edit"
-                size="sm"
-                variant="ghost"
-                onClick={handleEditClick}
-              >
-                <MdOutlineEdit />
-              </IconButton>
-            )}
+                          <Menu.Separator />
 
-            {isMutable && (
-              <>
-                <Button
-                  aria-label="Save"
+                          <Menu.Item value="cancel" onSelect={handleCancel}>
+                            <MdOutlineClose />
+                            Cancel
+                          </Menu.Item>
+                        </>
+                      )}
+                    </Menu.Content>
+                  </Menu.Positioner>
+                </Menu.Root>
+              </Box>
+            }
+          >
+            <HStack top={0} right={0} position="absolute" gap={2}>
+              {mode === "view" && canEdit && onChangeMode && (
+                <IconButton
+                  aria-label="Edit"
                   size="sm"
-                  onClick={handleSave}
                   variant="ghost"
+                  onClick={handleEditClick}
                 >
-                  <MdOutlineSave />
-                  Save
-                </Button>
+                  <MdOutlineEdit />
+                </IconButton>
+              )}
 
-                {canAdd && emptyItem && (
+              {isMutable && (
+                <>
                   <Button
-                    aria-label="Add"
-                    onClick={add}
+                    aria-label="Save"
+                    size="sm"
+                    onClick={handleSave}
+                    variant="ghost"
+                  >
+                    <MdOutlineSave />
+                    Save
+                  </Button>
+
+                  {canAdd && emptyItem && (
+                    <Button
+                      aria-label="Add"
+                      onClick={add}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <MdOutlineAdd />
+                      Add
+                    </Button>
+                  )}
+
+                  <Button
+                    aria-label="Cancel"
+                    onClick={handleCancel}
                     size="sm"
                     variant="ghost"
                   >
-                    <MdOutlineAdd />
-                    Add
+                    <MdOutlineClose />
+                    Cancel
                   </Button>
-                )}
-
-                <Button
-                  aria-label="Cancel"
-                  onClick={handleCancel}
-                  size="sm"
-                  variant="ghost"
-                >
-                  <MdOutlineClose />
-                  Cancel
-                </Button>
-              </>
-            )}
-          </HStack>
-        </Show>
+                </>
+              )}
+            </HStack>
+          </Show>
+        )}
       </Box>
 
       <VStack align="stretch" gap={3}>

@@ -19,8 +19,8 @@ export default async function Home() {
   }
 
   return (
-    <Box height={"vh"}>
-       <OceanViewer height="100vh" />
+    <Box height={"100%"}>
+      <OceanViewer height="100%" />
     </Box>
   );
 }

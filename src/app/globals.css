@@ -32,12 +32,19 @@
 
   /* Fix: use an existing palette color (no new hues) */
   --color-bg-muted: color-mix(in srgb, var(--palette-seashell) 85%, white 15%);
-  --color-fg-muted: color-mix(in srgb, var(--palette-twilight-indigo) 70%, black 30%);
+  --color-fg-muted: color-mix(
+    in srgb,
+    var(--palette-twilight-indigo) 70%,
+    black 30%
+  );
   --color-border: var(--palette-twilight-indigo);
 
   --font-sans: "Rubik", sans-serif;
 }
-
+html,
+body {
+  height: 100%;
+}
 body {
   background: var(--color-bg);
   color: var(--color-fg);

@@ -31,12 +31,15 @@ export const LinkSchema = new Schema<Link>(
   { _id: false }
 );
 
-export const ImageURLSchema = new Schema<ImageURL>({
-  url: { type: String, required: true },
-  alt: String,
-  width: Number,
-  height: Number,
-});
+export const ImageURLSchema = new Schema<ImageURL>(
+  {
+    url: { type: String, required: true },
+    alt: String,
+    width: Number,
+    height: Number,
+  },
+  { _id: true }
+);
 
 const ProjectSchema = new Schema<Project>(
   {

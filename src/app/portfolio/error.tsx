@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <Center h="100vh" w="100%">
+    <Center h="100%" w="100%">
       <VStack>
         <Text fontSize="lg" fontWeight="bold">Failed to load projects</Text>
         <Text color="gray.500" maxW="480px" textAlign="center">
