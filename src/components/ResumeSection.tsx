@@ -36,7 +36,6 @@ import { uploadImage, deleteImageByUrl } from "@/lib/imageService";
 import React from "react";
 import { HeaderData } from "./ResumeDrawer";
 
-
 export function HeaderSection({
   mode,
   header,
@@ -115,6 +114,7 @@ export function HeaderSection({
           setPending(null);
           setImgError(null);
           editStartUrlRef.current = null;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           setImgError(
             e?.message || "Failed to save headshot. Please try again."

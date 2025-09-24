@@ -25,9 +25,7 @@ export function ImageCarousel({
         {screenshots.map((img, i) => (
           <Carousel.Item key={`${img.url}-${i}`}>
             <Image
-              src={
-                "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?..."
-              }
+              src={img.url}
               alt={img.alt ?? `${name} screenshot ${i + 1}`}
               style={{ width: "100%", height: "auto", display: "block" }}
               loading="lazy"

@@ -173,6 +173,7 @@ export default function ResumePortal({
                   header={header}
                   onSave={async (next) => {
                     const h = next[0] ?? initialHeader;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const partial: Record<string, any> = {
                       name: h.name,
                       title: h.title ?? "",

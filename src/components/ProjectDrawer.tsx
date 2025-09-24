@@ -5,20 +5,16 @@ import {
   Heading,
   Text,
   Stack,
-  Wrap,
   HStack,
   Link,
   Tag,
   CloseButton,
-  Button,
-  Image,
   VisuallyHidden,
   BoxProps,
 } from "@chakra-ui/react";
 import { HiOutlineExternalLink } from "react-icons/hi";
 import * as React from "react";
 import { Project } from "@/models/project";
-import { useRouter } from "next/router";
 import { ImageCarousel } from "./ImageCarousel";
 
 type SectionProps = { title: string; children: React.ReactNode };
@@ -71,7 +67,6 @@ export default function ProjectPortal({
             <Drawer.Header
               as="header"
               top={0}
-             
               px={{ base: 3, md: 5 }}
               py={{ base: 3, md: 5 }}
               borderBottom="1px solid"
@@ -122,7 +117,6 @@ export default function ProjectPortal({
               ) : null}
 
               <Stack gap={1}>
-                {/* About Section */}
                 <Section
                   title="About"
                   mt={3}
@@ -136,7 +130,6 @@ export default function ProjectPortal({
                     <Muted>No description provided.</Muted>
                   )}
                 </Section>
-                {/* Tech Section */}
                 <Section
                   title="Tech"
                   mt={3}
@@ -157,7 +150,6 @@ export default function ProjectPortal({
                   })()}
                 </Section>
 
-                {/* Achivements */}
                 <Section
                   title="Key Achievements"
                   mt={3}
@@ -177,7 +169,6 @@ export default function ProjectPortal({
                     <Muted>No achievements added yet.</Muted>
                   )}
                 </Section>
-                {/* Links */}
                 <Section
                   title="Links"
                   mt={3}

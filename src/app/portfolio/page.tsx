@@ -1,4 +1,4 @@
-import { ProjectCarousel } from "@/components/ProjectCarousel";
+import { ProjectCarousel } from "@/components/ProjectSection";
 import { getDefaultProjects } from "@/lib/projectService";
 import { Project } from "@/models/project";
 import { Center, Box} from "@chakra-ui/react";

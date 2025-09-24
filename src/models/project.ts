@@ -4,7 +4,6 @@ export interface Link {
   label?: string;
   url: string;
 }
-//images stores in AWS S3
 export interface ImageURL {
   url: string;
   alt?: string;
