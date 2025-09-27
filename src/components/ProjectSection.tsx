@@ -56,7 +56,6 @@ const isHttp = (u: string) => /^https?:\/\//i.test(u);
 
 export default function ProjectCard({ project }: { project: Project }) {
   const primaryLink = project.links?.[0];
-
   return (
     <Card.Root
       as="article"
@@ -111,6 +110,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             display="-webkit-box"
             overflow="hidden"
             textOverflow="ellipsis"
+            minH={"42px"}
             style={{
               WebkitBoxOrient: "vertical",
               WebkitLineClamp: 3,
