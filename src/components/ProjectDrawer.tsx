@@ -1,52 +1,33 @@
+"use client";
+
+import * as React from "react";
+import { useState } from "react";
+import { Project, Link as ExtLink, ImageURL } from "@/models/project";
+import { SectionMode } from "./Section";
+import { patchProjectPartial } from "@/lib/projectService"; // implement if not present
 import {
   Box,
   Drawer,
   Portal,
   Heading,
-  Text,
-  Stack,
-  HStack,
-  Link,
-  Tag,
   CloseButton,
-  VisuallyHidden,
-  BoxProps,
+  Stack,
 } from "@chakra-ui/react";
-import { HiOutlineExternalLink } from "react-icons/hi";
-import * as React from "react";
-import { Project } from "@/models/project";
-import { ImageCarousel } from "./ImageCarousel";
-
-type SectionProps = { title: string; children: React.ReactNode };
-const Section = ({ title, children, ...rest }: SectionProps & BoxProps) => {
-  return (
-    <Box {...rest}>
-      <Heading as="h3" size="sm" letterSpacing="wide" mb={1}>
-        {title}
-      </Heading>
-      {children}
-    </Box>
-  );
+import { ProjectSection } from "./ProjectSection";
+type ProjectPortalProps = {
+  project: Project;
+  containerRef?: React.RefObject<HTMLElement> | null;
+  bodyRef: React.RefObject<HTMLDivElement>;
 };
-
-function Muted({ children }: { children: React.ReactNode }) {
-  return (
-    <Text opacity={0.72} fontStyle="italic">
-      {children}
-    </Text>
-  );
-}
 
 export default function ProjectPortal({
   project,
   containerRef,
   bodyRef,
-}: {
-  project: Project;
-  containerRef?: React.RefObject<HTMLElement> | null;
-  bodyRef: React.RefObject<HTMLDivElement>;
-}) {
+}: ProjectPortalProps) {
   if (!containerRef) return null;
+  const [mode, setMode] = useState<SectionMode>("view");
+  const [currentProject, setCurrentProject] = useState<Project>(project);
 
   return (
     <Box>
@@ -64,167 +45,41 @@ export default function ProjectPortal({
             overflow="auto"
             bg="bg"
           >
-            <Drawer.Header
-              as="header"
-              top={0}
-              px={{ base: 3, md: 5 }}
-              py={{ base: 3, md: 5 }}
-              borderBottom="1px solid"
-              borderColor="blackAlpha.200"
-            >
-              <Box pr={8}>
-                <Heading
-                  id="project-title"
-                  as="h2"
-                  size="md"
-                  lineHeight="short"
-                  letterSpacing="wide"
-                >
-                  {project.name}
-                </Heading>
-                <Text mt={1} fontSize="sm" color="fg.muted">
-                  {project.role}
-                </Text>
-              </Box>
-
+            <Box w="full" maxW="920px" mx="auto">
               <Drawer.CloseTrigger asChild>
-                <CloseButton
-                  position="absolute"
-                  top="10px"
-                  right="10px"
-                  size="sm"
-                  borderRadius="0"
-                  _focusVisible={{
-                    boxShadow: "0 0 0 2px var(--color-accent)",
-                  }}
-                />
+                <CloseButton size="sm" />
               </Drawer.CloseTrigger>
-            </Drawer.Header>
+              <Drawer.Body>
+                <Stack gap={10}>
+                  <ProjectSection
+                    mode={mode}
+                    onChangeMode={setMode}
+                    project={currentProject}
+                    canEdit
+                    onSave={async (nextList) => {
+                      const next =
+                        (Array.isArray(nextList) ? nextList[0] : nextList) ??
+                        currentProject;
 
-            <Drawer.Body
-              borderBottom="1px solid"
-              borderColor={"var(--color-accent)"}
-              px={{ base: 3, md: 5 }}
-              py={{ base: 3, md: 4 }}
-            >
-              {project.screenshots?.length ? (
-                <Box maxW="500px" mx={"auto"}>
-                  <ImageCarousel
-                    name={project.name}
-                    screenshots={project.screenshots}
+                      const partial: Partial<Project> = {
+                        name: next.name,
+                        role: next.role,
+                        tech: next.tech ?? [],
+                        description: next.description ?? "",
+                        achievements: next.achievements ?? [],
+                        links: next.links ?? [],
+                        screenshots: next.screenshots ?? [],
+                      };
+
+                      await patchProjectPartial(currentProject._id, partial);
+                      setCurrentProject({ ...currentProject, ...partial });
+                      setMode("view");
+                    }}
+                    onCancel={() => setMode("view")}
                   />
-                </Box>
-              ) : null}
-
-              <Stack gap={1}>
-                <Section
-                  title="About"
-                  mt={3}
-                  borderLeft="3px solid"
-                  borderColor="var(--color-accent)"
-                  pl={4}
-                >
-                  {project.description?.trim() ? (
-                    <Text>{project.description.trim()}</Text>
-                  ) : (
-                    <Muted>No description provided.</Muted>
-                  )}
-                </Section>
-                <Section
-                  title="Tech"
-                  mt={3}
-                  borderLeft="3px solid"
-                  borderColor="var(--color-accent)"
-                  pl={4}
-                >
-                  {(() => {
-                    const techClean = Array.isArray(project.tech)
-                      ? project.tech.filter((t) => t && t.trim().length > 0)
-                      : [];
-
-                    return techClean.length > 0 ? (
-                      <Text>{techClean.join(" • ")}</Text>
-                    ) : (
-                      <Muted>No tech listed.</Muted>
-                    );
-                  })()}
-                </Section>
-
-                <Section
-                  title="Key Achievements"
-                  mt={3}
-                  borderLeft="3px solid"
-                  borderColor="var(--color-accent)"
-                  pl={4}
-                >
-                  {project.achievements?.length ? (
-                    <Stack as="ul" gap={2} pl={5} lineHeight="shorter">
-                      {project.achievements.map((a, i) => (
-                        <Box as="li" key={i}>
-                          {a}
-                        </Box>
-                      ))}
-                    </Stack>
-                  ) : (
-                    <Muted>No achievements added yet.</Muted>
-                  )}
-                </Section>
-                <Section
-                  title="Links"
-                  mt={3}
-                  borderLeft="3px solid"
-                  borderColor="var(--color-accent)"
-                  pl={4}
-                >
-                  {project.links?.length ? (
-                    <HStack gap={1}>
-                      {project.links.map((l, i) => {
-                        const label =
-                          l.label?.trim() ||
-                          (() => {
-                            try {
-                              return new URL(l.url).hostname.replace(
-                                /^www\./,
-                                ""
-                              );
-                            } catch {
-                              return l.url;
-                            }
-                          })();
-
-                        return (
-                          <Tag.Root
-                            key={`${l.url}-${i}`}
-                            asChild
-                            borderRadius="0px"
-                            _hover={{
-                              bg: "var(--color-accent)",
-                              color: "var(--color-seashell)",
-                            }}
-                            height="30px"
-                            p={"2"}
-                          >
-                            <Tag.Label>
-                              <Link
-                                href={l.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <VisuallyHidden>Open </VisuallyHidden>
-                                {label}
-                                <HiOutlineExternalLink />
-                              </Link>
-                            </Tag.Label>
-                          </Tag.Root>
-                        );
-                      })}
-                    </HStack>
-                  ) : (
-                    <Muted>No external links.</Muted>
-                  )}
-                </Section>
-              </Stack>
-            </Drawer.Body>
+                </Stack>
+              </Drawer.Body>
+            </Box>
           </Drawer.Content>
         </Drawer.Positioner>
       </Portal>

@@ -21,8 +21,8 @@ export default async function PortfolioIDPage({
   }
   project = project as Project;
   return (
-    <Box>
-      <ProjectSection p={project} />
+    <Box >
+      <ProjectSection project={project} mode="view" canEdit={false} />
     </Box>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { useState } from "react";
-import { Link as ExtLink } from "@/models/project";
+import { Link as ExtLink, Project } from "@/models/project";
 import { SectionMode } from "@/components/Section";
 import { patchResumeField, patchResumePartial } from "@/lib/resumeService";
 import {
@@ -39,6 +39,7 @@ import {
   Resume,
 } from "@/models/resume";
 import { ImageURL } from "@/models/project";
+import { getAllProjects } from "@/lib/projectService";
 
 type SectionKey =
   | "header"
@@ -113,7 +114,13 @@ export default function ResumePortal({
     summary: resume.summary ?? undefined,
     isDefault: resume.isDefault ?? false,
   };
-
+  const [allProjects, setAllProjects] = React.useState<Project[]>([]);
+  React.useEffect(() => {
+    (async () => {
+      const list = await getAllProjects();
+      setAllProjects(Array.isArray(list) ? list : []);
+    })();
+  }, []);
   const [header, setHeader] = useState<HeaderData>(initialHeader);
   const [education, setEducation] = useState<Education[]>(
     resume.education ?? []
