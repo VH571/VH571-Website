@@ -10,13 +10,13 @@ export default function Navbar() {
   return (
     <Box
       bg={"var(--color-seashell)"}
-      h={"full"}
-      w="full"
+      h={"100%"}
+      w="100%"
       fontWeight={"bold"}
       fontSize={"2.5rem"}
     >
-      <VStack h="full">
-        <Box flex={1} w="full" maxH="125px" minH="110px" position="relative">
+      <VStack h="100%">
+        <Box flex={1} w="100%" maxH="125px" minH="110px" position="relative">
           <Box
             position="absolute"
             inset={0}
@@ -53,7 +53,7 @@ export default function Navbar() {
           </Box>
         </Box>
 
-        <VStack w="full" color="var(--color-lapis)" my="5px" align="flex-end">
+        <VStack w="100%" color="var(--color-lapis)" align="flex-end">
           <HStack align="flex-start" gap={"8"}>
             <Text
               fontSize="0.9rem"

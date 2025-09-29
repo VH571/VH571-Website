@@ -14,18 +14,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <Provider>
-          <Flex font={"var(--font-sans)"} height = {"100dhv"} overflow={"hidden"}>
-            <Box as={"aside"} flex={"0 0 auto"} position={"sticky"} top={"0"} height={"100dvh"}  width={"200px"}>
-              <Navbar/>
+          <Flex font={"var(--font-sans)"} h="100%">
+            <Box
+              as="aside"
+              flex="0 0 auto"
+              position="sticky"
+              top="0"
+              w="200px"
+              h="100%"
+            >
+              <Navbar />
             </Box>
-            <Box as={"main"} flex={"1 1 auto"} minWidth={"0"} height={"100dvh"} overflowY={"auto"}> 
+            <Box as="main" flex="1" h="100%" overflowY="auto">
               {children}
             </Box>
           </Flex>

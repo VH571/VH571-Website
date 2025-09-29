@@ -14,11 +14,17 @@ const STATIC_ROUTES: StaticMap = {
 };
 
 const DYNAMIC_PATTERNS: Array<[RegExp, RouteLabel]> = [
+  [/^\/portfolio\/[^/]+$/, "PROJECT"],
   [/^\/project\/[^/]+$/, "PROJECT"],
 ];
 
+function normalize(pathname: string) {
+  const p = pathname.split("?")[0].split("#")[0].replace(/\/+$/, "");
+  return p || "/";
+}
+
 export function getRouteLabel(pathname: string): RouteLabel {
-  const clean = pathname.replace(/\/+$/, "") || "/";
+  const clean = normalize(pathname);
   if (STATIC_ROUTES[clean]) return STATIC_ROUTES[clean];
 
   for (const [re, label] of DYNAMIC_PATTERNS) {
