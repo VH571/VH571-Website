@@ -18,8 +18,7 @@ export async function GET(
   const fileDoc = await db.collection("images.files").findOne({ _id });
   if (!fileDoc) return new NextResponse("Not found", { status: 404 });
 
-  const contentType =
-    (fileDoc as any).contentType || "application/octet-stream";
+  const contentType = fileDoc.contentType ?? "application/octet-stream";
 
   const bucket = await getBucket();
   const stream = bucket.openDownloadStream(_id);

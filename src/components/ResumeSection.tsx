@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TagInput } from "./TagInput";
 import { IoMdTrash } from "react-icons/io";
 import { Section, SectionMode } from "./Section";
@@ -21,6 +21,7 @@ import {
   Heading,
   Image,
   Checkbox,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   Education,
@@ -34,8 +35,154 @@ import {
 import { ImageUpload, DraftImage } from "./ImageUploader";
 import { uploadImage, deleteImageByUrl } from "@/lib/imageService";
 import React from "react";
-import { HeaderData } from "./ResumeDrawer";
+import { HeaderData } from "./ResumePortal";
+import { Project } from "@/models/project";
+import { getAllProjects } from "@/lib/projectService";
+type ProjectPick = Project & { selected: boolean };
+export function ProjectsSection({
+  mode,
+  selectedIds,
+  onSave,
+  onCancel,
+  onChangeMode,
+  canEdit,
+  title = <SectionHeader jp="プロジェクト" en="Projects" />,
+}: {
+  mode: SectionMode;
+  selectedIds: string[];
+  onSave?: (nextSelectedIds: string[]) => void | Promise<void>;
+  onCancel?: () => void;
+  onChangeMode?: (m: SectionMode) => void;
+  canEdit?: boolean;
+  title?: React.ReactNode;
+}) {
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setLoadError(null);
+        const list = await getAllProjects();
+        if (!alive) return;
+        setAllProjects(list ?? []);
+      } catch (e: unknown) {
+        if (!alive) return;
+        setLoadError(
+          e instanceof Error ? e.message : "Failed to load projects"
+        );
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const picks: ProjectPick[] = useMemo(() => {
+    const chosen = new Set(selectedIds ?? []);
+    return (allProjects ?? []).map((p) => ({
+      ...p,
+      selected: chosen.has(String(p._id)),
+    }));
+  }, [allProjects, selectedIds]);
+
+  const dataForSection: ProjectPick[] =
+    mode === "view" ? picks.filter((p) => p.selected) : picks;
+
+  const handleSave = async (draft: ProjectPick[]) => {
+    const nextIds = draft.filter((p) => p.selected).map((p) => String(p._id));
+    await onSave?.(nextIds);
+  };
+
+  const Row = ({
+    item,
+    index,
+    toggleSelected,
+    isEdit,
+  }: {
+    item: ProjectPick;
+    index: number;
+    toggleSelected?: (index: number, value: boolean) => void;
+    isEdit: boolean;
+  }) => (
+    <Box
+      key={item._id ?? index}
+      p={3}
+      my="1px"
+      borderWidth="1px"
+      borderRadius="md"
+    >
+      <HStack gap={1} align="start">
+        <VStack gap="0" align="start">
+          <Text fontWeight="semibold">{item.name}</Text>
+          <Text fontSize="sm" color="gray.600">
+            {item.role}
+          </Text>
+        </VStack>
+
+        <HStack marginLeft="auto" gap={1}>
+          {isEdit && toggleSelected && (
+            <Button
+              size="sm"
+              variant={item.selected ? "outline" : "solid"}
+              onClick={() => toggleSelected(index, !item.selected)}
+            >
+              {item.selected ? "Remove" : "Add"}
+            </Button>
+          )}
+        </HStack>
+      </HStack>
+    </Box>
+  );
+
+  if (loading) {
+    return (
+      <Box p={3}>
+        <HStack>
+          <Spinner /> <Text>Loading projects…</Text>
+        </HStack>
+      </Box>
+    );
+  }
+  if (loadError) {
+    return (
+      <Box p={3}>
+        <Text color="red.500">{loadError}</Text>
+      </Box>
+    );
+  }
+  return (
+    <Section<ProjectPick>
+      mode={mode}
+      title={title}
+      data={dataForSection}
+      canAdd={false}
+      canEdit={canEdit}
+      onSave={handleSave}
+      onCancel={onCancel}
+      onChangeMode={onChangeMode}
+      renderViewItem={(item, index) => (
+        <Box key={index}>
+          <Row item={item} index={index} isEdit={false} />
+        </Box>
+      )}
+      renderEditItem={(item, index, update) => (
+        <Box key={index}>
+          <Row
+            item={item}
+            index={index}
+            isEdit
+            toggleSelected={(i, value) => update(i, { selected: value })}
+          />
+        </Box>
+      )}
+    />
+  );
+}
 export function HeaderSection({
   mode,
   header,
@@ -98,7 +245,7 @@ export function HeaderSection({
         try {
           if (pending) {
             const oldUrl = editStartUrlRef.current;
-            if (oldUrl) {
+            if (oldUrl && oldUrl !== "/images/default-headshot.png") {
               await deleteImageByUrl(oldUrl);
             }
             const img = await uploadImage(pending.file, {
@@ -114,10 +261,11 @@ export function HeaderSection({
           setPending(null);
           setImgError(null);
           editStartUrlRef.current = null;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (e: any) {
+        } catch (e: unknown) {
           setImgError(
-            e?.message || "Failed to save headshot. Please try again."
+            e instanceof Error
+              ? e.message
+              : "Failed to save headshot. Please try again."
           );
           throw e;
         }
@@ -372,7 +520,6 @@ export function HeaderSection({
     />
   );
 }
-
 export function EducationSection({
   mode,
   education,

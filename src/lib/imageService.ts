@@ -2,6 +2,7 @@ import { getBaseUrl } from "./routes";
 import type { ImageURL } from "@/models/project";
 
 const baseUrl = getBaseUrl();
+export const DEFAULT_HEADSHOT = "/images/default-headshot.png";
 
 export async function uploadImage(
   file: File,

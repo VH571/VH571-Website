@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Box, Input, InputGroup, Kbd } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Input, InputGroup} from "@chakra-ui/react";
 import { IoMdSearch } from "react-icons/io";
 import { Project } from "@/models/project";
 import { Resume } from "@/models/resume";
@@ -76,7 +76,7 @@ export default function SearchBar({
   placeholder = "Search…",
 }: Props) {
   return (
-    <InputGroup startElement={<IoMdSearch />} endElement={<Kbd >Enter</Kbd>}>
+    <InputGroup startElement={<IoMdSearch />}>
       <Input
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}

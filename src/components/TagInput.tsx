@@ -1,5 +1,4 @@
 import { HStack, Input, Tag } from "@chakra-ui/react";
-import { LuPlus } from "react-icons/lu";
 import { useState } from "react";
 
 type TagInputProps = {
@@ -7,7 +6,7 @@ type TagInputProps = {
   onChange: (next: string[]) => void;
   placeholder?: string;
   allowDuplicates?: boolean;
-  icon?: React.ReactNode; // optional Tag.StartElement icon
+  icon?: React.ReactNode;
 };
 
 export function TagInput({

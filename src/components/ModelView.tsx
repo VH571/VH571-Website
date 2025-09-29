@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, useRef } from "react";
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { Canvas, useLoader } from "@react-three/fiber";
 import { Bounds, Center, Html, OrbitControls } from "@react-three/drei";
 import { Mesh } from "three";
 import { Center as CenterL, Spinner, VStack, Text } from "@chakra-ui/react";

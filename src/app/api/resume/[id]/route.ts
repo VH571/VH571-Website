@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/db";
 import { ResumeModel } from "@/models/resume";
 import mongoose from "mongoose";
 import { MongoServerError } from "mongodb";
+import { deleteImageByUrl, DEFAULT_HEADSHOT } from "@/lib/imageService";
+
 //get specific resume
 export async function GET(
   request: Request,
@@ -71,6 +73,10 @@ export async function DELETE(
         { $set: { isDefault: true } },
         { sort: { updatedAt: -1 } }
       );
+    }
+    const url = deleted.headshot?.url;
+    if (url && url !== DEFAULT_HEADSHOT) {
+      await deleteImageByUrl(url).catch(() => {});
     }
 
     return NextResponse.json({
@@ -180,7 +186,7 @@ export async function PATCH(
       );
     }
     return NextResponse.json(
-      { error: (err as any)?.message || "Patch failed" },
+      { error: err instanceof Error ? err.message : "Patch failed" },
       { status: 500 }
     );
   }

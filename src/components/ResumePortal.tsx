@@ -1,29 +1,16 @@
 "use client";
 import * as React from "react";
 import { useState } from "react";
-import { Link as ExtLink, Project } from "@/models/project";
 import { SectionMode } from "@/components/Section";
 import { patchResumeField, patchResumePartial } from "@/lib/resumeService";
-import {
-  Box,
-  Drawer,
-  Portal,
-  Heading,
-  Text,
-  Stack,
-  HStack,
-  Link,
-  CloseButton,
-  Image,
-  VStack,
-} from "@chakra-ui/react";
-
+import { Box, Drawer, Portal, Stack, CloseButton } from "@chakra-ui/react";
 import {
   HeaderSection,
   EducationSection,
   ExperienceSection,
   ExtracurricularSection,
   SkillsSection,
+  ProjectsSection,
   VolunteerSection,
   CertificationsSection,
   AwardsSection,
@@ -39,11 +26,11 @@ import {
   Resume,
 } from "@/models/resume";
 import { ImageURL } from "@/models/project";
-import { getAllProjects } from "@/lib/projectService";
 
 type SectionKey =
   | "header"
   | "education"
+  | "projects"
   | "experience"
   | "skills"
   | "extracurricular"
@@ -57,6 +44,7 @@ function useSectionModes(initial?: Partial<Record<SectionKey, SectionMode>>) {
     education: "view",
     experience: "view",
     skills: "view",
+    projects: "view",
     extracurricular: "view",
     volunteer: "view",
     certifications: "view",
@@ -73,6 +61,7 @@ function useSectionModes(initial?: Partial<Record<SectionKey, SectionMode>>) {
       education: mode,
       experience: mode,
       skills: mode,
+      projects: mode,
       extracurricular: mode,
       volunteer: mode,
       certifications: mode,
@@ -81,6 +70,7 @@ function useSectionModes(initial?: Partial<Record<SectionKey, SectionMode>>) {
 
   return { modes, setMode, setAll };
 }
+
 export type HeaderData = {
   name: string;
   title?: string;
@@ -92,6 +82,7 @@ export type HeaderData = {
   summary?: string;
   isDefault?: boolean;
 };
+
 export default function ResumePortal({
   resume,
   containerRef,
@@ -114,16 +105,13 @@ export default function ResumePortal({
     summary: resume.summary ?? undefined,
     isDefault: resume.isDefault ?? false,
   };
-  const [allProjects, setAllProjects] = React.useState<Project[]>([]);
-  React.useEffect(() => {
-    (async () => {
-      const list = await getAllProjects();
-      setAllProjects(Array.isArray(list) ? list : []);
-    })();
-  }, []);
+
   const [header, setHeader] = useState<HeaderData>(initialHeader);
   const [education, setEducation] = useState<Education[]>(
     resume.education ?? []
+  );
+  const [projectIds, setProjectIds] = useState<string[]>(
+    (resume.projects ?? []).map((p: unknown) => String(p))
   );
   const [experience, setExperience] = useState<Experience[]>(
     resume.experience ?? []
@@ -143,12 +131,6 @@ export default function ResumePortal({
 
   if (!containerRef) return null;
 
-  const contactLinks: ExtLink[] = [
-    resume.githubUrl ? { url: resume.githubUrl, label: "GitHub" } : null,
-    resume.linkedinUrl ? { url: resume.linkedinUrl, label: "LinkedIn" } : null,
-    resume.website ? { url: resume.website, label: "Website" } : null,
-  ].filter(Boolean) as ExtLink[];
-
   return (
     <Box>
       <Portal container={containerRef ?? ""}>
@@ -163,10 +145,10 @@ export default function ResumePortal({
             minH="320px"
             maxH="960px"
             overflow="auto"
-            scrollbar={"hidden"}
+            scrollbar="hidden"
             bg="bg"
           >
-            <Box w="full" maxW={"920px"} mx="auto">
+            <Box w="full" maxW="920px" mx="auto">
               <Drawer.Header
                 as="header"
                 marginTop="10px"
@@ -180,8 +162,7 @@ export default function ResumePortal({
                   header={header}
                   onSave={async (next) => {
                     const h = next[0] ?? initialHeader;
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const partial: Record<string, any> = {
+                    const partial: Record<string, unknown> = {
                       name: h.name,
                       title: h.title ?? "",
                       email: h.email,
@@ -192,9 +173,7 @@ export default function ResumePortal({
                       headshot: h.headshot ?? null,
                       isDefault: !!h.isDefault,
                     };
-
                     await patchResumePartial(resume._id, partial);
-
                     setHeader(h);
                     setMode("header")("view");
                   }}
@@ -211,6 +190,7 @@ export default function ResumePortal({
                   <CloseButton size="lg" />
                 </Drawer.CloseTrigger>
               </Drawer.Header>
+
               <Drawer.Body px={{ base: 3, md: 5 }} py={{ base: 3, md: 4 }}>
                 <Stack gap={10}>
                   <EducationSection
@@ -225,7 +205,6 @@ export default function ResumePortal({
                     onCancel={() => setMode("education")("view")}
                     canEdit
                   />
-
                   <ExperienceSection
                     mode={modes.experience}
                     onChangeMode={setMode("experience")}
@@ -237,6 +216,18 @@ export default function ResumePortal({
                     }}
                     onCancel={() => setMode("experience")("view")}
                     canEdit
+                  />
+                  <ProjectsSection
+                    mode={modes.projects}
+                    onChangeMode={setMode("projects")}
+                    canEdit
+                    selectedIds={projectIds}
+                    onSave={async (nextIds) => {
+                      await patchResumeField(resume._id, "projects", nextIds);
+                      setProjectIds(nextIds);
+                      setMode("projects")("view");
+                    }}
+                    onCancel={() => setMode("projects")("view")}
                   />
 
                   <SkillsSection

@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import {
   Box,
   HStack,
@@ -10,19 +10,14 @@ import {
   Show,
   Menu,
   useBreakpointValue,
-  Drawer,
-  CloseButton,
 } from "@chakra-ui/react";
 import {
   MdOutlineEdit,
-  MdOutlineEditOff,
   MdOutlineAdd,
-  MdOutlineSaveAs,
   MdOutlineSave,
-  MdOutlineCancel,
   MdOutlineClose,
-  MdOutlineMenu,
 } from "react-icons/md";
+import { SlOptions as MdOutlineMenu } from "react-icons/sl";
 export type SectionMode = "view" | "edit" | "create";
 
 export type SectionProps<T> = {
@@ -58,7 +53,6 @@ export function Section<T>({
   renderEditItem,
 }: SectionProps<T>) {
   const isMutable = canEdit && (mode === "edit" || mode === "create");
-
   const [draft, setDraft] = useState<T[]>(
     isMutable && mode === "create"
       ? emptyItem
@@ -66,6 +60,19 @@ export function Section<T>({
         : []
       : (data ?? [])
   );
+
+  const dataKey = JSON.stringify(data ?? []);
+
+  useEffect(() => {
+    if (mode === "create") {
+      setDraft(emptyItem ? [emptyItem()] : []);
+    } else if (mode === "edit") {
+      setDraft(data ?? []);
+    } else {
+      setDraft(data ?? []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, dataKey, canEdit]);
 
   const items = isMutable ? draft : data;
 
@@ -102,7 +109,7 @@ export function Section<T>({
 
   return (
     <Box as="section" display="inline-block" w="100%">
-      <Box position="relative" mb={3} zIndex={100}>
+      <Box position="relative" zIndex={100}>
         <Box w="100%">{title}</Box>
         {canEdit && (
           <Show
@@ -111,7 +118,7 @@ export function Section<T>({
               <Box position="absolute" top={0} right={0}>
                 <Menu.Root size="md" variant={"subtle"}>
                   <Menu.Trigger asChild>
-                    <IconButton aria-label="Actions" size="sm" variant="ghost">
+                    <IconButton aria-label="Actions" size="lg" variant="ghost">
                       <MdOutlineMenu />
                     </IconButton>
                   </Menu.Trigger>
@@ -154,7 +161,7 @@ export function Section<T>({
               </Box>
             }
           >
-            <HStack top={0} right={0} position="absolute" gap={2}>
+            <HStack top={0} right={"0"} position="absolute" gap={2}>
               {mode === "view" && canEdit && onChangeMode && (
                 <IconButton
                   aria-label="Edit"

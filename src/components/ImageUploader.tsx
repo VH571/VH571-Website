@@ -1,16 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Button,
-  FileUpload,
-  HStack,
-  VStack,
-  Text,
-  Image,
-  Box,
-  Alert,
-} from "@chakra-ui/react";
+import { Button, FileUpload, HStack, VStack, Alert } from "@chakra-ui/react";
 import { HiUpload } from "react-icons/hi";
 
 export type DraftImage = {
@@ -67,11 +58,16 @@ export function ImageUpload({
     return () => {
       items.forEach((it) => revoke(it.previewUrl));
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleAccept(details: any) {
+  async function handleAccept(details: unknown) {
     setGlobalError(null);
-    const accepted: File[] = details?.files ?? [];
+    const accepted =
+      (details as { files?: File[] })?.files?.filter(
+        (f): f is File => f instanceof File
+      ) ?? [];
+
     if (!accepted.length) return;
 
     const drafts: DraftImage[] = [];
@@ -93,18 +89,10 @@ export function ImageUpload({
     onSelected?.(drafts);
   }
 
-  function handleReject(details: any) {
-    const first = details?.errors?.[0];
-    setGlobalError(first?.message || "File was rejected");
-  }
-
-  function removeLocal(index: number) {
-    setItems((prev) => {
-      const next = [...prev];
-      revoke(next[index]?.previewUrl);
-      next.splice(index, 1);
-      return next;
-    });
+  function handleReject(details: unknown) {
+    const firstMessage = (details as { errors?: { message?: string }[] })
+      ?.errors?.[0]?.message;
+    setGlobalError(firstMessage || "File was rejected");
   }
 
   return (

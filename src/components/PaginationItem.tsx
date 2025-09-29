@@ -46,6 +46,7 @@ export default function PaginationItems({
   React.useEffect(() => {
     if (page > totalPages) setPage(totalPages);
     if (page < 1) setPage(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPages]);
 
   const startIdx = (page - 1) * pageSize;

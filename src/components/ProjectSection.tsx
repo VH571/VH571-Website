@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Box,
   Image,
@@ -6,15 +7,12 @@ import {
   Card,
   Button,
   Link as ChakraLink,
-  Link,
   SimpleGrid,
   HStack,
   Tag,
   VStack,
   Icon,
   Heading,
-  List,
-  ListItem,
   IconButton,
   Input,
   Field,
@@ -23,16 +21,18 @@ import {
 import { IoMdTrash } from "react-icons/io";
 import { TagInput } from "./TagInput";
 import "@/styles/bootstrap-carousel.scss";
-import { Project } from "@/models/project";
+import { Project, ImageURL } from "@/models/project";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import Carousel from "react-bootstrap/Carousel";
 import "@/styles/bootstrap-carousel.scss";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import NextLink from "next/link";
 import { HiFolder, HiOutlineExternalLink } from "react-icons/hi";
 import { ImageCarousel } from "./ImageCarousel";
 import { Section, SectionMode } from "./Section";
-import { SectionHeader } from "./Utilities";
+import { ImageUpload, DraftImage } from "./ImageUploader";
+import { uploadImage, deleteImageByUrl } from "@/lib/imageService";
+
 function AccentBlock({
   title,
   subtitle,
@@ -64,6 +64,527 @@ function AccentBlock({
   );
 }
 const isHttp = (u: string) => /^https?:\/\//i.test(u);
+
+export function ProjectSection({
+  mode,
+  project,
+  onSave,
+  onCancel,
+  onChangeMode,
+  canEdit,
+}: {
+  mode: SectionMode;
+  project: Project;
+  onSave?: (next: Project) => void | Promise<void>;
+  onCancel?: () => void;
+  onChangeMode?: (m: SectionMode) => void;
+  canEdit?: boolean;
+}) {
+  const [shots, setShots] = useState<ImageURL[]>(project.screenshots ?? []);
+  const [pendingDrafts, setPendingDrafts] = useState<DraftImage[]>([]);
+  const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
+  const [imgError, setImgError] = useState<string | null>(null);
+  const draftUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    if (mode === "view") {
+      draftUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+      draftUrlsRef.current = [];
+      setPendingDrafts([]);
+      setPendingDeletes([]);
+      setImgError(null);
+      setShots(project.screenshots ?? []);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, project._id]);
+
+  useEffect(() => {
+    draftUrlsRef.current = pendingDrafts.map((d) => d.previewUrl);
+  }, [pendingDrafts]);
+
+  function handleAddDrafts(ds: DraftImage[]) {
+    setImgError(null);
+    setPendingDrafts((prev) => [...prev, ...ds]);
+  }
+
+  function removeExisting(url: string) {
+    setShots((prev) => prev.filter((img) => img.url !== url));
+    setPendingDeletes((prev) => (prev.includes(url) ? prev : [...prev, url]));
+  }
+
+  function removeDraft(idx: number) {
+    setPendingDrafts((prev) => {
+      const next = [...prev];
+      URL.revokeObjectURL(next[idx].previewUrl);
+      next.splice(idx, 1);
+      return next;
+    });
+  }
+  const data = [project];
+  const handleSave = async (nextArr: Project[]) => {
+    const curr = nextArr[0] ?? project;
+    const updated: Project = { ...curr };
+
+    try {
+      setImgError(null);
+
+      const uploaded: ImageURL[] = [];
+      for (const d of pendingDrafts) {
+        const img = await uploadImage(d.file, {
+          alt: d.alt,
+          width: d.width || undefined,
+          height: d.height || undefined,
+        });
+        uploaded.push(img);
+      }
+
+      for (const url of pendingDeletes) {
+        try {
+          await deleteImageByUrl(url);
+        } catch (err) {
+          setImgError(
+            err instanceof Error
+              ? err.message
+              : "Images failed to delete from storage"
+          );
+        }
+      }
+
+      updated.screenshots = [...shots, ...uploaded];
+
+      await onSave?.(updated);
+
+      pendingDrafts.forEach((d) => URL.revokeObjectURL(d.previewUrl));
+      setPendingDrafts([]);
+      setPendingDeletes([]);
+      setImgError(null);
+    } catch (e: unknown) {
+      setImgError(
+        e instanceof Error ? e.message : "Failed to save screenshots"
+      );
+      throw e;
+    }
+  };
+
+  return (
+    <Section<Project>
+      mode={mode}
+      data={data}
+      canAdd={false}
+      canEdit={canEdit}
+      emptyItem={(): Project => ({
+        _id: "",
+        name: "",
+        role: "",
+        tech: [],
+        description: "",
+        achievements: [],
+        links: [],
+        screenshots: [],
+      })}
+      onSave={handleSave}
+      onCancel={() => {
+        pendingDrafts.forEach((d) => URL.revokeObjectURL(d.previewUrl));
+        setPendingDrafts([]);
+        setPendingDeletes([]);
+        setImgError(null);
+        setShots(project.screenshots ?? []);
+        onCancel?.();
+      }}
+      onChangeMode={onChangeMode}
+      renderViewItem={(p, index) => {
+        const primaryLink = Array.isArray(p.links) ? p.links[0] : undefined;
+        return (
+          <Box key={index}>
+            <VStack align={"start"}>
+              <VStack gap={0} align={"start"}>
+                <Heading size="lg" color="var(--color-fg)" title={p.name}>
+                  {p.name}
+                </Heading>
+                {p.role ? (
+                  <Text
+                    mt={1}
+                    color="var(--color-accent-alt)"
+                    fontWeight="semibold"
+                  >
+                    {p.role}
+                  </Text>
+                ) : null}
+              </VStack>
+
+              {Array.isArray(p.screenshots) && p.screenshots.length > 0 ? (
+                <AccentBlock>
+                  <Box
+                    border="1px solid"
+                    borderColor="blackAlpha.200"
+                    borderRadius="md"
+                    overflow="hidden"
+                    maxW={{ base: "40rem", md: "auto" }}
+                  >
+                    <ImageCarousel name={p.name} screenshots={p.screenshots} />
+                  </Box>
+                </AccentBlock>
+              ) : (
+                <AccentBlock>
+                  <Text fontStyle="italic" color="gray.500" fontSize="sm">
+                    No screenshots available.
+                  </Text>
+                </AccentBlock>
+              )}
+
+              <AccentBlock title="Description">
+                {p.description ? (
+                  <Text color="gray.700" fontSize="sm" whiteSpace="pre-wrap">
+                    {p.description}
+                  </Text>
+                ) : (
+                  <Text fontStyle="italic" color="gray.500" fontSize="sm">
+                    No description available.
+                  </Text>
+                )}
+              </AccentBlock>
+
+              <AccentBlock title="Tech Stack">
+                {Array.isArray(p.tech) && p.tech.length > 0 ? (
+                  <HStack flexWrap="wrap" gap={2}>
+                    {p.tech.map((t, i) => (
+                      <Tag.Root
+                        key={`${t}-${i}`}
+                        size="sm"
+                        variant="subtle"
+                        bg="blackAlpha.50"
+                        color="var(--color-fg)"
+                        border="1px solid"
+                        borderColor="blackAlpha.200"
+                      >
+                        <Tag.Label>{t}</Tag.Label>
+                      </Tag.Root>
+                    ))}
+                  </HStack>
+                ) : (
+                  <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                    No tech listed.
+                  </Text>
+                )}
+              </AccentBlock>
+
+              <AccentBlock title="Achievements">
+                {Array.isArray(p.achievements) && p.achievements.length > 0 ? (
+                  <Box as="ul" pl={4} color="gray.700">
+                    {p.achievements.map((a, i) => (
+                      <Text as="li" key={`${a}-${i}`} fontSize="sm">
+                        {a}
+                      </Text>
+                    ))}
+                  </Box>
+                ) : (
+                  <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                    No achievements listed.
+                  </Text>
+                )}
+              </AccentBlock>
+
+              <AccentBlock>
+                <HStack flexWrap="wrap" gap={3}>
+                  {Array.isArray(p.links) && p.links.length > 0 ? (
+                    p.links.map((l, i) => (
+                      <ChakraLink
+                        as={NextLink}
+                        key={`${l.url}-${i}`}
+                        href={l.url}
+                        {...(isHttp(l.url) ? { isExternal: true } : {})}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          color="var(--color-accent)"
+                          borderColor="var(--color-accent)"
+                          _hover={{
+                            bg: "var(--color-accent)",
+                            color: "var(--color-bg)",
+                          }}
+                        >
+                          {l.label ?? "Open Link"}
+                        </Button>
+                      </ChakraLink>
+                    ))
+                  ) : (
+                    <Text fontSize="sm" color="gray.500" fontStyle="italic">
+                      No links provided.
+                    </Text>
+                  )}
+                  {primaryLink && (
+                    <ChakraLink
+                      href={primaryLink.url}
+                      {...(isHttp(primaryLink.url) ? { isExternal: true } : {})}
+                    >
+                      <Button
+                        size="sm"
+                        bg="var(--color-accent)"
+                        color="var(--color-bg)"
+                        _hover={{ opacity: 0.9 }}
+                      >
+                        {primaryLink.label ?? "Visit"}
+                      </Button>
+                    </ChakraLink>
+                  )}
+                </HStack>
+              </AccentBlock>
+              {!canEdit && (
+                <ChakraLink as={NextLink} href="/portfolio" mx={"auto"}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    color="var(--color-accent)"
+                    _hover={{
+                      bg: "var(--color-accent)",
+                      color: "var(--color-bg)",
+                    }}
+                  >
+                    Back to Portfolio
+                  </Button>
+                </ChakraLink>
+              )}
+            </VStack>
+          </Box>
+        );
+      }}
+      renderEditItem={(item, index, update) => (
+        <Box key={index} w="100%" mt={"44px"} position="relative">
+          <HStack justify="space-between" align="start">
+            <Field.Root required>
+              <Field.Label>
+                Project Name <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                value={item.name ?? ""}
+                placeholder="Project name"
+                onChange={(e) => update(index, { name: e.target.value })}
+              />
+            </Field.Root>
+          </HStack>
+
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={3} mt={2}>
+            <Field.Root required>
+              <Field.Label>
+                Role <Field.RequiredIndicator />
+              </Field.Label>
+              <Input
+                value={item.role ?? ""}
+                placeholder="e.g., Frontend Engineer"
+                onChange={(e) => update(index, { role: e.target.value })}
+              />
+            </Field.Root>
+
+            <Field.Root>
+              <Field.Label>Tech</Field.Label>
+              <TagInput
+                values={item.tech ?? []}
+                placeholder="Add a tech…"
+                onChange={(next) => update(index, { tech: next })}
+              />
+            </Field.Root>
+
+            <Field.Root gridColumn="1 / -1">
+              <Field.Label>Description</Field.Label>
+              <Textarea
+                value={item.description ?? ""}
+                placeholder="Brief overview of the project"
+                onChange={(e) => update(index, { description: e.target.value })}
+                h={{ base: "6em", md: "6em" }}
+                resize="vertical"
+              />
+            </Field.Root>
+
+            <Field.Root gridColumn="1 / -1">
+              <Field.Label>Achievements</Field.Label>
+              <VStack align="stretch" gap={2} mt={1} w="100%">
+                {(item.achievements ?? []).map((achievement, j) => (
+                  <HStack key={j} align="start">
+                    <Textarea
+                      flex="1"
+                      value={achievement}
+                      placeholder="Impact, metric, or key result"
+                      onChange={(e) => {
+                        const achievements = [...(item.achievements ?? [])];
+                        achievements[j] = e.target.value;
+                        update(index, { achievements });
+                      }}
+                      h={{ base: "3em", sm: "5em" }}
+                      resize="none"
+                    />
+                    <IconButton
+                      aria-label="Remove achievement"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const achievements = (item.achievements ?? []).filter(
+                          (_, k) => k !== j
+                        );
+                        update(index, { achievements });
+                      }}
+                    >
+                      <IoMdTrash />
+                    </IconButton>
+                  </HStack>
+                ))}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    update(index, {
+                      achievements: [...(item.achievements ?? []), ""],
+                    })
+                  }
+                >
+                  + Add Achievement
+                </Button>
+              </VStack>
+            </Field.Root>
+
+            <Field.Root gridColumn="1 / -1">
+              <Field.Label>Links</Field.Label>
+              <VStack align="stretch" gap={2} mt={1} w="100%">
+                {(item.links ?? []).map((link, j) => (
+                  <HStack key={j} align="start" gap={2}>
+                    <Input
+                      flex="1"
+                      placeholder="Label"
+                      value={link.label ?? ""}
+                      onChange={(e) => {
+                        const links = [...(item.links ?? [])];
+                        links[j] = {
+                          ...(links[j] ?? { label: "", url: "" }),
+                          label: e.target.value,
+                        };
+                        update(index, { links });
+                      }}
+                    />
+                    <Input
+                      flex="2"
+                      placeholder="https://example.com"
+                      value={link.url ?? ""}
+                      onChange={(e) => {
+                        const links = [...(item.links ?? [])];
+                        links[j] = {
+                          ...(links[j] ?? { label: "", url: "" }),
+                          url: e.target.value,
+                        };
+                        update(index, { links });
+                      }}
+                    />
+                    <IconButton
+                      aria-label="Remove link"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const links = (item.links ?? []).filter(
+                          (_, k) => k !== j
+                        );
+                        update(index, { links });
+                      }}
+                    >
+                      <IoMdTrash />
+                    </IconButton>
+                  </HStack>
+                ))}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    update(index, {
+                      links: [...(item.links ?? []), { label: "", url: "" }],
+                    })
+                  }
+                >
+                  + Add Link
+                </Button>
+              </VStack>
+            </Field.Root>
+
+            <Field.Root gridColumn="1 / -1">
+              <Field.Label>Screenshots</Field.Label>
+
+              <VStack align="stretch" gap={2} mt={2}>
+                <Text fontWeight="semibold">Existing</Text>
+                <SimpleGrid columns={{ base: 2, md: 3 }} gap={3}>
+                  {shots.map((img, j) => (
+                    <Box key={`${img.url}-${j}`} position="relative">
+                      <Image
+                        src={img.url}
+                        alt={img.alt ?? `screenshot-${j}`}
+                        objectFit="cover"
+                        w="100%"
+                        aspectRatio={16 / 9}
+                      />
+                      <IconButton
+                        aria-label="Remove screenshot"
+                        size="sm"
+                        variant="solid"
+                        position="absolute"
+                        top={2}
+                        right={2}
+                        onClick={() => removeExisting(img.url)}
+                      >
+                        <IoMdTrash />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </SimpleGrid>
+                {!shots.length && (
+                  <Text color="fg.muted">None kept (add new below).</Text>
+                )}
+              </VStack>
+
+              <VStack align="stretch" gap={2} mt={4}>
+                <Text fontWeight="semibold">Add</Text>
+                <ImageUpload maxFiles={10} onSelected={handleAddDrafts} />
+
+                {pendingDrafts.length > 0 && (
+                  <Box>
+                    <Text fontWeight="semibold" mt={3} mb={2}>
+                      Pending (to be uploaded on Save)
+                    </Text>
+                    <SimpleGrid columns={{ base: 2, md: 3 }} gap={3}>
+                      {pendingDrafts.map((d, j) => (
+                        <Box key={`${d.previewUrl}-${j}`} position="relative">
+                          <Image
+                            src={d.previewUrl}
+                            alt={d.alt || "new screenshot"}
+                            objectFit="cover"
+                            w="100%"
+                            aspectRatio={16 / 9}
+                          />
+                          <IconButton
+                            aria-label="Remove pending screenshot"
+                            size="sm"
+                            variant="solid"
+                            position="absolute"
+                            top={2}
+                            right={2}
+                            onClick={() => removeDraft(j)}
+                          >
+                            <IoMdTrash />
+                          </IconButton>
+                        </Box>
+                      ))}
+                    </SimpleGrid>
+                  </Box>
+                )}
+
+                {imgError && (
+                  <Text color="red.500" mt={2}>
+                    {imgError}
+                  </Text>
+                )}
+              </VStack>
+            </Field.Root>
+          </SimpleGrid>
+        </Box>
+      )}
+    />
+  );
+}
 
 export default function ProjectCard({ project }: { project: Project }) {
   const primaryLink = project.links?.[0];
@@ -206,7 +727,7 @@ export function ProjectCarousel({ projects }: { projects: Project[] }) {
   const [active, setActive] = useState(0);
 
   if (!projects?.length) {
-    return <Box>No projects found.</Box>;
+    return <Box>No projects come back later!</Box>;
   }
 
   return (
@@ -270,474 +791,5 @@ export function ProjectCarousel({ projects }: { projects: Project[] }) {
         })}
       </Carousel>
     </Box>
-  );
-}
-export function ProjectSection({
-  mode,
-  project,
-  onSave,
-  onCancel,
-  onChangeMode,
-  canEdit,
-}: {
-  mode: SectionMode;
-  project: Project;
-  onSave?: (next: Project) => void | Promise<void>;
-  onCancel?: () => void;
-  onChangeMode?: (m: SectionMode) => void;
-  canEdit?: boolean;
-}) {
-  const data = [project];
-  const handleSave = async (nextArr: Project[]) => {
-    if (onSave) await onSave(nextArr[0]);
-  };
-
-  return (
-    <Section<Project>
-      mode={mode}
-      data={data}
-      canAdd={false}
-      canEdit={canEdit}
-      emptyItem={(): Project => ({
-        _id: "",
-        name: "",
-        role: "",
-        tech: [],
-        description: "",
-        achievements: [],
-        links: [],
-        screenshots: [],
-      })}
-      onSave={handleSave}
-      onCancel={onCancel}
-      onChangeMode={onChangeMode}
-      renderViewItem={(p, index) => {
-        const primaryLink = Array.isArray(p.links) ? p.links[0] : undefined;
-        return (
-          <Box key={index}>
-            <VStack align={"start"}>
-              <VStack gap={0}align={"start"}>
-                <Heading size="lg" color="var(--color-fg)" title={p.name}>
-                  {p.name}
-                </Heading>
-                {p.role ? (
-                  <Text
-                    mt={1}
-                    color="var(--color-accent-alt)"
-                    fontWeight="semibold"
-                  >
-                    {p.role}
-                  </Text>
-                ) : null}
-              </VStack>
-
-              {Array.isArray(p.screenshots) && p.screenshots.length > 0 ? (
-                <AccentBlock>
-                  <Box
-                    border="1px solid"
-                    borderColor="blackAlpha.200"
-                    borderRadius="md"
-                    overflow="hidden"
-                  >
-                    <ImageCarousel name={p.name} screenshots={p.screenshots} />
-                  </Box>
-                </AccentBlock>
-              ) : (
-                <AccentBlock>
-                  <Text fontStyle="italic" color="gray.500" fontSize="sm">
-                    No screenshots available.
-                  </Text>
-                </AccentBlock>
-              )}
-
-              <AccentBlock title="Description">
-                {p.description ? (
-                  <Text color="gray.700" fontSize="sm" whiteSpace="pre-wrap">
-                    {p.description}
-                  </Text>
-                ) : (
-                  <Text fontStyle="italic" color="gray.500" fontSize="sm">
-                    No description available.
-                  </Text>
-                )}
-              </AccentBlock>
-
-              <AccentBlock title="Tech Stack">
-                {Array.isArray(p.tech) && p.tech.length > 0 ? (
-                  <HStack flexWrap="wrap" gap={2}>
-                    {p.tech.map((t, i) => (
-                      <Tag.Root
-                        key={`${t}-${i}`}
-                        size="sm"
-                        variant="subtle"
-                        bg="blackAlpha.50"
-                        color="var(--color-fg)"
-                        border="1px solid"
-                        borderColor="blackAlpha.200"
-                      >
-                        <Tag.Label>{t}</Tag.Label>
-                      </Tag.Root>
-                    ))}
-                  </HStack>
-                ) : (
-                  <Text fontSize="sm" color="gray.500" fontStyle="italic">
-                    No tech listed.
-                  </Text>
-                )}
-              </AccentBlock>
-
-              <AccentBlock title="Achievements">
-                {Array.isArray(p.achievements) && p.achievements.length > 0 ? (
-                  <Box as="ul" pl={4} color="gray.700">
-                    {p.achievements.map((a, i) => (
-                      <Text as="li" key={`${a}-${i}`} fontSize="sm">
-                        {a}
-                      </Text>
-                    ))}
-                  </Box>
-                ) : (
-                  <Text fontSize="sm" color="gray.500" fontStyle="italic">
-                    No achievements listed.
-                  </Text>
-                )}
-              </AccentBlock>
-
-              <AccentBlock>
-                <HStack flexWrap="wrap" gap={3}>
-                  {Array.isArray(p.links) && p.links.length > 0 ? (
-                    p.links.map((l, i) => (
-                      <ChakraLink
-                        as={NextLink}
-                        key={`${l.url}-${i}`}
-                        href={l.url}
-                        {...(isHttp(l.url) ? { isExternal: true } : {})}
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          color="var(--color-accent)"
-                          borderColor="var(--color-accent)"
-                          _hover={{
-                            bg: "var(--color-accent)",
-                            color: "var(--color-bg)",
-                          }}
-                        >
-                          {l.label ?? "Open Link"}
-                        </Button>
-                      </ChakraLink>
-                    ))
-                  ) : (
-                    <Text fontSize="sm" color="gray.500" fontStyle="italic">
-                      No links provided.
-                    </Text>
-                  )}
-                  {primaryLink && (
-                    <ChakraLink
-                      href={primaryLink.url}
-                      {...(isHttp(primaryLink.url) ? { isExternal: true } : {})}
-                    >
-                      <Button
-                        size="sm"
-                        bg="var(--color-accent)"
-                        color="var(--color-bg)"
-                        _hover={{ opacity: 0.9 }}
-                      >
-                        {primaryLink.label ?? "Visit"}
-                      </Button>
-                    </ChakraLink>
-                  )}
-                </HStack>
-              </AccentBlock>
-              {!canEdit && (
-                <ChakraLink as={NextLink} href="/portfolio" mx={"auto"}>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    color="var(--color-accent)"
-                    _hover={{
-                      bg: "var(--color-accent)",
-                      color: "var(--color-bg)",
-                    }}
-                  >
-                    Back to Portfolio
-                  </Button>
-                </ChakraLink>
-              )}
-            </VStack>
-          </Box>
-        );
-      }}
-      renderEditItem={(item, index, update) => (
-        <Box
-          key={index}
-          w="100%"
-          borderLeft="3px solid"
-          borderColor="var(--color-accent)"
-          pl={4}
-          pb={3}
-          position="relative"
-        >
-          <HStack justify="space-between" align="start">
-            <Field.Root required>
-              <Field.Label>
-                Project Name <Field.RequiredIndicator />
-              </Field.Label>
-              <Input
-                value={item.name ?? ""}
-                placeholder="Project name"
-                onChange={(e) => update(index, { name: e.target.value })}
-              />
-            </Field.Root>
-
-            {/* No remove button for single-project mode */}
-          </HStack>
-
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={3} mt={2}>
-            {/* Role */}
-            <Field.Root required>
-              <Field.Label>
-                Role <Field.RequiredIndicator />
-              </Field.Label>
-              <Input
-                value={item.role ?? ""}
-                placeholder="e.g., Frontend Engineer"
-                onChange={(e) => update(index, { role: e.target.value })}
-              />
-            </Field.Root>
-
-            {/* Tech tags */}
-            <Field.Root>
-              <Field.Label>Tech</Field.Label>
-              <TagInput
-                values={item.tech ?? []}
-                placeholder="Add a tech…"
-                onChange={(next) => update(index, { tech: next })}
-              />
-            </Field.Root>
-
-            {/* Description */}
-            <Field.Root gridColumn="1 / -1">
-              <Field.Label>Description</Field.Label>
-              <Textarea
-                value={item.description ?? ""}
-                placeholder="Brief overview of the project"
-                onChange={(e) => update(index, { description: e.target.value })}
-                h={{ base: "6em", md: "6em" }}
-                resize="vertical"
-              />
-            </Field.Root>
-
-            {/* Achievements */}
-            <Field.Root gridColumn="1 / -1">
-              <Field.Label>Achievements</Field.Label>
-              <VStack align="stretch" gap={2} mt={1} w="100%">
-                {(item.achievements ?? []).map((achievement, j) => (
-                  <HStack key={j} align="start">
-                    <Textarea
-                      flex="1"
-                      value={achievement}
-                      placeholder="Impact, metric, or key result"
-                      onChange={(e) => {
-                        const achievements = [...(item.achievements ?? [])];
-                        achievements[j] = e.target.value;
-                        update(index, { achievements });
-                      }}
-                      h={{ base: "3em", sm: "5em" }}
-                      resize="none"
-                    />
-                    <IconButton
-                      aria-label="Remove achievement"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        const achievements = (item.achievements ?? []).filter(
-                          (_, k) => k !== j
-                        );
-                        update(index, { achievements });
-                      }}
-                    >
-                      <IoMdTrash />
-                    </IconButton>
-                  </HStack>
-                ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    update(index, {
-                      achievements: [...(item.achievements ?? []), ""],
-                    })
-                  }
-                >
-                  + Add Achievement
-                </Button>
-              </VStack>
-            </Field.Root>
-
-            {/* Links */}
-            <Field.Root gridColumn="1 / -1">
-              <Field.Label>Links</Field.Label>
-              <VStack align="stretch" gap={2} mt={1} w="100%">
-                {(item.links ?? []).map((link, j) => (
-                  <HStack key={j} align="start" gap={2}>
-                    <Input
-                      flex="1"
-                      placeholder="Label"
-                      value={link.label ?? ""}
-                      onChange={(e) => {
-                        const links = [...(item.links ?? [])];
-                        links[j] = {
-                          ...(links[j] ?? { label: "", url: "" }),
-                          label: e.target.value,
-                        };
-                        update(index, { links });
-                      }}
-                    />
-                    <Input
-                      flex="2"
-                      placeholder="https://example.com"
-                      value={link.url ?? ""}
-                      onChange={(e) => {
-                        const links = [...(item.links ?? [])];
-                        links[j] = {
-                          ...(links[j] ?? { label: "", url: "" }),
-                          url: e.target.value,
-                        };
-                        update(index, { links });
-                      }}
-                    />
-                    <IconButton
-                      aria-label="Remove link"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        const links = (item.links ?? []).filter(
-                          (_, k) => k !== j
-                        );
-                        update(index, { links });
-                      }}
-                    >
-                      <IoMdTrash />
-                    </IconButton>
-                  </HStack>
-                ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    update(index, {
-                      links: [...(item.links ?? []), { label: "", url: "" }],
-                    })
-                  }
-                >
-                  + Add Link
-                </Button>
-              </VStack>
-            </Field.Root>
-
-            {/* Screenshots */}
-            <Field.Root gridColumn="1 / -1">
-              <Field.Label>Screenshots</Field.Label>
-              <VStack align="stretch" gap={2} mt={1} w="100%">
-                {(item.screenshots ?? []).map((img, j) => (
-                  <SimpleGrid
-                    key={j}
-                    columns={{ base: 1, md: 4 }}
-                    gap={2}
-                    alignItems="start"
-                  >
-                    <Input
-                      placeholder="Image URL"
-                      value={img.url ?? ""}
-                      onChange={(e) => {
-                        const screenshots = [...(item.screenshots ?? [])];
-                        screenshots[j] = {
-                          ...(screenshots[j] ?? { url: "" }),
-                          url: e.target.value,
-                        };
-                        update(index, { screenshots });
-                      }}
-                    />
-                    <Input
-                      placeholder="Alt text"
-                      value={img.alt ?? ""}
-                      onChange={(e) => {
-                        const screenshots = [...(item.screenshots ?? [])];
-                        screenshots[j] = {
-                          ...(screenshots[j] ?? { url: "" }),
-                          alt: e.target.value,
-                        };
-                        update(index, { screenshots });
-                      }}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Width (px)"
-                      value={img.width ?? ""}
-                      onChange={(e) => {
-                        const n = e.target.value
-                          ? parseInt(e.target.value, 10)
-                          : undefined;
-                        const screenshots = [...(item.screenshots ?? [])];
-                        screenshots[j] = {
-                          ...(screenshots[j] ?? { url: "" }),
-                          width: Number.isNaN(n) ? undefined : n,
-                        };
-                        update(index, { screenshots });
-                      }}
-                    />
-                    <HStack>
-                      <Input
-                        type="number"
-                        placeholder="Height (px)"
-                        value={img.height ?? ""}
-                        onChange={(e) => {
-                          const n = e.target.value
-                            ? parseInt(e.target.value, 10)
-                            : undefined;
-                          const screenshots = [...(item.screenshots ?? [])];
-                          screenshots[j] = {
-                            ...(screenshots[j] ?? { url: "" }),
-                            height: Number.isNaN(n) ? undefined : n,
-                          };
-                          update(index, { screenshots });
-                        }}
-                      />
-                      <IconButton
-                        aria-label="Remove screenshot"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          const screenshots = (item.screenshots ?? []).filter(
-                            (_, k) => k !== j
-                          );
-                          update(index, { screenshots });
-                        }}
-                      >
-                        <IoMdTrash />
-                      </IconButton>
-                    </HStack>
-                  </SimpleGrid>
-                ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    update(index, {
-                      screenshots: [
-                        ...(item.screenshots ?? []),
-                        { url: "", alt: "" },
-                      ],
-                    })
-                  }
-                >
-                  + Add Screenshot
-                </Button>
-              </VStack>
-            </Field.Root>
-          </SimpleGrid>
-        </Box>
-      )}
-    />
   );
 }

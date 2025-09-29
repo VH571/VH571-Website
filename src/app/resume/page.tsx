@@ -6,11 +6,11 @@ import {
   Image,
   Link,
   Separator,
+  Heading,
 } from "@chakra-ui/react";
 import { Resume } from "@/models/resume";
 import { getDefaultResume } from "@/lib/resumeService";
 import {
-  HeaderSection,
   EducationSection,
   ExtracurricularSection,
   ExperienceSection,
@@ -19,19 +19,50 @@ import {
   CertificationsSection,
   AwardsSection,
 } from "@/components/ResumeSection";
-type ResumeResult = Resume | { error: string } | null;
 import { SiGithub, SiLinkedin } from "react-icons/si";
 import { IoIosMail, IoIosGlobe } from "react-icons/io";
+
+type ResumeResult = Resume | { error: string } | null;
+
 export default async function ResumePage() {
   let defaultResume: ResumeResult = null;
+  let error: string | null = null;
+
   try {
     defaultResume = await getDefaultResume();
   } catch (err) {
-    throw new Error(`Could not fetch default resume. ${err}`);
+    error = `Could not fetch default resume: ${(err as Error).message}`;
+    defaultResume = { error };
   }
 
   if (!defaultResume || "error" in defaultResume) {
-    throw new Error(defaultResume?.error ?? "No default resume found.");
+    const errorMessage = defaultResume?.error ?? "No default resume found";
+
+    return (
+      <Box
+        as="article"
+        maxW="10xl"
+        height={{ base: "none", md: "100%" }}
+        mx="auto"
+        p={6}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <VStack gap={4} textAlign="center" py={12}>
+          <Heading size="lg">Resume Not Available</Heading>
+          <Text fontSize="lg">
+            We are having trouble loading the resume right now.
+          </Text>
+          <Text fontSize="sm">Please try again later or check back soon.</Text>
+          {process.env.NODE_ENV === "development" && (
+            <Text color="red.400" fontSize="xs" mt={4}>
+              Debug: {errorMessage}
+            </Text>
+          )}
+        </VStack>
+      </Box>
+    );
   }
 
   return (

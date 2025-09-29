@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { ProjectModel } from "@/models/project";
 import mongoose from "mongoose";
+import { deleteImageByUrl } from "@/lib/imageService";
+
 //get specific project
 export async function GET(
   request: Request,
@@ -65,10 +67,13 @@ export async function DELETE(
     if (!deleted) {
       return NextResponse.json({ error: "project not found" }, { status: 404 });
     }
-    return NextResponse.json({
-      message: "project deleted",
-      id,
-    });
+
+    const urls = (deleted.screenshots ?? [])
+      .map((s) => s?.url)
+      .filter(Boolean) as string[];
+    await Promise.allSettled(urls.map((u) => deleteImageByUrl(u)));
+
+    return NextResponse.json({ message: "project deleted", id });
   } catch {
     return NextResponse.json(
       { error: "Failed to delete project" },
@@ -129,7 +134,7 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: (err as any)?.message || "Patch failed" },
+      { error: err instanceof Error ? err.message : "Patch failed" },
       { status: 500 }
     );
   }
