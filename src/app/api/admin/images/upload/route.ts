@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const id = uploadStream.id.toString();
 
   const image: ImageURL = {
-    url: `/api/images/${id}`,
+    url: `/api/public/images/${id}`,
     alt: alt || undefined,
     width: width || undefined,
     height: height || undefined,

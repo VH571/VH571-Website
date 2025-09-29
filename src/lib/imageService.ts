@@ -14,7 +14,7 @@ export async function uploadImage(
   if (opts?.width) fd.append("width", String(opts.width));
   if (opts?.height) fd.append("height", String(opts.height));
 
-  const res = await fetch(`${baseUrl}/api/images/upload`, {
+  const res = await fetch(`${baseUrl}/api/admin/images/upload`, {
     method: "POST",
     body: fd,
   });
@@ -24,7 +24,9 @@ export async function uploadImage(
 
 export async function deleteImageByUrl(url: string) {
   const id = url.split("/").pop()!;
-  const res = await fetch(`${baseUrl}/api/images/${id}`, { method: "DELETE" });
+  const res = await fetch(`${baseUrl}/api/admin/images/${id}`, {
+    method: "DELETE",
+  });
   if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
   return res.json();
 }

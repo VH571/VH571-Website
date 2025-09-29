@@ -1,35 +1,40 @@
 import { getBaseUrl } from "./routes";
 import { Project } from "@/models/project";
 const baseUrl = getBaseUrl();
-//get default project
+
+// ===== PUBLIC ROUTES =====
+
+// get default projects
 export async function getDefaultProjects(): Promise<Project[]> {
-  const response = await fetch(`${baseUrl}/api/project`);
+  const response = await fetch(`${baseUrl}/api/public/project`);
   return response.json();
 }
 
-//get resume projects
+// get resume projects
 export async function getResumeProjects(id: string): Promise<Project[]> {
-  const response = await fetch(`${baseUrl}/api/projects/${id}`);
+  const response = await fetch(`${baseUrl}/api/public/projects/${id}`);
   return response.json();
 }
 
-//get all projects
+// get all projects
 export async function getAllProjects() {
-  const response = await fetch(`${baseUrl}/api/projects`);
+  const response = await fetch(`${baseUrl}/api/public/projects`);
   return response.json();
 }
 
-//get specific project
+// get specific project
 export async function getProjectByID(id: string) {
-  const response = await fetch(`${baseUrl}/api/project/${id}`);
+  const response = await fetch(`${baseUrl}/api/public/project/${id}`);
   return response.json();
 }
 
-//make new project
+// ===== ADMIN ROUTES  =====
+
+// make new project
 export async function makeNewproject(
   project: Omit<Project, "_id">
 ): Promise<Project> {
-  const response = await fetch(`${baseUrl}/api/project`, {
+  const response = await fetch(`${baseUrl}/api/admin/project`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(project),
@@ -42,9 +47,9 @@ export async function makeNewproject(
   return data.project;
 }
 
-//edit specific project
+// edit specific project
 export async function editProjectByID(id: string, project: Project) {
-  const response = await fetch(`${baseUrl}/api/project/${id}`, {
+  const response = await fetch(`${baseUrl}/api/admin/project/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(project),
@@ -52,9 +57,9 @@ export async function editProjectByID(id: string, project: Project) {
   return response.json();
 }
 
-//delete specific project
+// delete specific project
 export async function deleteProjectByID(id: string) {
-  const response = await fetch(`${baseUrl}/api/project/${id}`, {
+  const response = await fetch(`${baseUrl}/api/admin/project/${id}`, {
     method: "DELETE",
   });
   return response.json();
@@ -65,7 +70,7 @@ export async function patchProjectField(
   field: string,
   value: unknown
 ) {
-  const res = await fetch(`${baseUrl}/api/project/${id}`, {
+  const res = await fetch(`${baseUrl}/api/admin/project/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ field, value }),
@@ -79,7 +84,7 @@ export async function patchProjectPath(
   path: string,
   value: unknown
 ) {
-  const res = await fetch(`${baseUrl}/api/project/${id}`, {
+  const res = await fetch(`${baseUrl}/api/admin/project/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path, value }),
@@ -92,7 +97,7 @@ export async function patchProjectPartial(
   id: string,
   partial: Record<string, unknown>
 ) {
-  const res = await fetch(`${baseUrl}/api/project/${id}`, {
+  const res = await fetch(`${baseUrl}/api/admin/project/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(partial),
