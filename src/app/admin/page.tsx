@@ -8,7 +8,7 @@ import { Project } from "@/models/project";
 
 type ResumesLst = Resume[] | { error: string } | null;
 type ProjectLst = Project[] | { error: string } | null;
-
+import { SignOutButton } from "@/components/SignOutButton";
 export default async function Admin() {
   let resumeList: ResumesLst = null;
   let projectList: ProjectLst = null;
@@ -41,6 +41,7 @@ export default async function Admin() {
 
   return (
     <Box>
+      <SignOutButton />
       <Tabs.Root
         defaultValue="resumes"
         variant="line"

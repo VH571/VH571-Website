@@ -3,7 +3,7 @@ import "./globals.css";
 import { Provider } from "@/components/ui/provider";
 import Navbar from "@/components/Navbar";
 import { Box, Flex } from "@chakra-ui/react";
-
+import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: "571's Website",
   description: "Victor's website to show off some of his skills.",
@@ -34,6 +34,7 @@ export default function RootLayout({
             </Box>
             <Box as="main" flex="1" h="100%" overflowY="auto">
               {children}
+              <Toaster />
             </Box>
           </Flex>
         </Provider>

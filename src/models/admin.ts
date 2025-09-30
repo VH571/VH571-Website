@@ -1,10 +1,11 @@
-import { Schema, model, models } from "mongoose";
-export interface Admin {
-  _id: string;
+import { Schema, model, models, type Types, type Model } from "mongoose";
+
+export interface IAdmin {
+  _id: Types.ObjectId;
   username: string;
   password: string;
   role: "admin";
-  twoFA: { enabled: boolean; secretEnc: string };
+  twoFA?: { enabled: boolean; secretEnc: string };
 }
 
 const TwoFASchema = new Schema(
@@ -14,9 +15,10 @@ const TwoFASchema = new Schema(
   },
   { _id: false }
 );
-export const AdminSchema = new Schema<Admin>(
+
+export const AdminSchema = new Schema<IAdmin>(
   {
-    username: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["admin"], default: "admin" },
     twoFA: { type: TwoFASchema, default: () => ({}) },
@@ -24,4 +26,6 @@ export const AdminSchema = new Schema<Admin>(
   { _id: true }
 );
 
-export const User = models.User || model("User", AdminSchema);
+export function getAdminModel(): Model<IAdmin> {
+  return (models.Admin as Model<IAdmin>) || model<IAdmin>("Admin", AdminSchema);
+}
