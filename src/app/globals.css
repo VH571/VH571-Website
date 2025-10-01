@@ -50,3 +50,43 @@ body {
   color: var(--color-fg);
   font-family: var(--font-sans);
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--colors-bg-muted, var(--color-bg-muted))
+    inset;
+
+  -webkit-text-fill-color: var(--colors-text, var(--color-text));
+  caret-color: var(--colors-text, var(--color-text));
+
+  transition: background-color 9999s ease-out 0s;
+
+  border-color: var(--colors-border, var(--color-border));
+}
+
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus {
+  outline: 2px solid var(--colors-brand-focusRing, var(--color-accent));
+  outline-offset: 2px;
+}
+
+input:-moz-autofill,
+textarea:-moz-autofill,
+select:-moz-autofill {
+  box-shadow: 0 0 0 1000px var(--colors-bg-muted, var(--color-bg-muted)) inset;
+  -moz-text-fill-color: var(--colors-text, var(--color-text));
+  caret-color: var(--colors-text, var(--color-text));
+  border-color: var(--colors-border, var(--color-border));
+}
+
+input,
+textarea,
+select {
+  background: var(--colors-bg-muted, var(--color-bg-muted));
+  color: var(--colors-text, var(--color-text));
+  border: 1px solid var(--colors-border, var(--color-border));
+}

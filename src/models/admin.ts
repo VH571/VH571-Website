@@ -1,18 +1,31 @@
-import mongoose, { Model, Schema } from "mongoose";
-//simple credentials for admin
-export interface Admin {
-  _id: string;
+import { Schema, model, models, type Types, type Model } from "mongoose";
+
+export interface IAdmin {
+  _id: Types.ObjectId;
   username: string;
   password: string;
+  role: "admin";
+  twoFA?: { enabled: boolean; secretEnc: string };
 }
 
-export const AdminSchema = new Schema<Admin>(
+const TwoFASchema = new Schema(
   {
-    username: { type: String, required: true},
+    enabled: { type: Boolean, default: false },
+    secretEnc: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
+export const AdminSchema = new Schema<IAdmin>(
+  {
+    username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    role: { type: String, enum: ["admin"], default: "admin" },
+    twoFA: { type: TwoFASchema, default: () => ({}) },
   },
   { _id: true }
 );
 
-export const AdminModel: Model<Admin> =
-  mongoose.models.Resume || mongoose.model<Admin>("Admin", AdminSchema);
+export function getAdminModel(): Model<IAdmin> {
+  return (models.Admin as Model<IAdmin>) || model<IAdmin>("Admin", AdminSchema);
+}
