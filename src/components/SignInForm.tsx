@@ -20,7 +20,7 @@ import {
 type FormValues = {
   username: string;
   password: string;
-  totp?: string[]; // <-- array for PinInput
+  totp?: string[];
 };
 
 type Preflight = { ok: boolean; needsTotp?: boolean; ticket?: string };
@@ -35,13 +35,13 @@ export function SignInForm() {
   const {
     register,
     handleSubmit,
-    control, // <-- get control
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     defaultValues: {
       username: "",
       password: "",
-      totp: Array(6).fill(""), // <-- array default
+      totp: Array(6).fill(""),
     },
   });
 

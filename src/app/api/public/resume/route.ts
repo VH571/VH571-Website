@@ -5,8 +5,13 @@ import { ResumeModel } from "@/models/resume";
 //get defaut resume
 export async function GET() {
   await connectDB();
-  const resume = await ResumeModel.findOne({ isDefault: true }).lean();
-
+  const resume = await ResumeModel.findOne({ isDefault: true })
+    .select("projects")
+    .populate({
+      path: "projects",
+      select: "_id name role tech description achievements links screenshots",
+    })
+    .lean();
   if (!resume) {
     return NextResponse.json(
       { error: "No default resume set" },

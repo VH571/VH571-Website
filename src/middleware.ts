@@ -1,7 +1,7 @@
-// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+const PUBLIC_POST_ALLOWLIST = new Set<string>(["/api/public/resume-pdf"]);
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -21,7 +21,14 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith("/api/public")) {
-    if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+    if (method === "OPTIONS") return NextResponse.next();
+
+    const isAllowlistedPost =
+      method === "POST" && PUBLIC_POST_ALLOWLIST.has(pathname);
+
+    const isSafe = method === "GET" || method === "HEAD";
+
+    if (!(isAllowlistedPost || isSafe)) {
       return new NextResponse("Method Not Allowed", { status: 405 });
     }
   }
